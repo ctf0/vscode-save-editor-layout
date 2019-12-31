@@ -1,0 +1,1 @@
+# vscode-save-editor-layout
