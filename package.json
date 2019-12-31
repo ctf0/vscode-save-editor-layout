@@ -1,6 +1,6 @@
 {
-    "name": "save-editor-layout",
-    "displayName": "save-editor-layout",
+    "name": "save-editors-layout",
+    "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
     "version": "0.0.1",
     "publisher": "ctf0",
@@ -12,40 +12,119 @@
         "Other"
     ],
     "activationEvents": [
+        "onView:layouts_list",
         "onCommand:editorLayout.save",
         "onCommand:editorLayout.open",
-        "onCommand:editorLayout.delete",
+        "onCommand:editorLayout.remove",
         "onCommand:editorLayout.update"
     ],
-    "main": "./extension.js",
+    "main": "./src/extension.js",
     "contributes": {
         "commands": [
             {
                 "command": "editorLayout.save",
-                "title": "Editor Layout: save"
+                "title": "Editor Layout: save group",
+                "icon": "$(references)"
             },
             {
                 "command": "editorLayout.open",
-                "title": "Editor Layout: open"
+                "title": "Editor Layout: open group",
+                "icon": "$(telescope)"
             },
             {
-                "command": "editorLayout.delete",
-                "title": "Editor Layout: delete"
+                "command": "editorLayout.remove",
+                "title": "Editor Layout: remove group"
             },
             {
                 "command": "editorLayout.update",
-                "title": "Editor Layout: update"
+                "title": "Editor Layout: update group"
+            },
+            {
+                "command": "editorLayout.openFile",
+                "title": "Editor Layout: open file"
+            },
+            {
+                "command": "editorLayout.treeRemove",
+                "title": "Editor Layout: remove group/file",
+                "icon": "$(chrome-close)"
             }
         ],
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "editorLayout.save",
+                    "when": "editorIsOpen"
+                },
+                {
+                    "command": "editorLayout.update",
+                    "when": "editorIsOpen"
+                },
+                {
+                    "command": "editorLayout.openFile",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.treeRemove",
+                    "when": "false"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "editorLayout.open",
+                    "when": "view == layouts_list",
+                    "group": "navigation"
+                },
+                {
+                    "command": "editorLayout.save",
+                    "when": "view == layouts_list && editorIsOpen",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "editorLayout.treeRemove",
+                    "when": "view == layouts_list",
+                    "group": "inline"
+                }
+            ]
+        },
         "configuration": {
             "title": "Editor Layout",
+            "type": "object",
             "properties": {
                 "editorLayout.list": {
                     "type": "array",
                     "default": [],
                     "description": "groups"
+                },
+                "editorLayout.saveToGlobal": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "save groups globally or per workspace"
+                },
+                "editorLayout.closeEditorsAfterSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "close all opened editors after saving a group"
                 }
             }
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "editor-layouts",
+                    "title": "Editor Layout Groups",
+                    "icon": "img/icon.svg"
+                }
+            ]
+        },
+        "views": {
+            "editor-layouts": [
+                {
+                    "id": "layouts_list",
+                    "name": "List"
+                }
+            ]
         }
     },
     "scripts": {
