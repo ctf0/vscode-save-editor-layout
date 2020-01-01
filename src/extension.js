@@ -1,7 +1,7 @@
 const vscode = require('vscode')
 const { TreeProvider } = require('./TreeProvider')
 
-let prevUntitledItem = null
+let untitledItems = []
 let saveList = []
 let config = {}
 
@@ -39,6 +39,10 @@ async function activate(context) {
 async function save() {
     await loopOver()
 
+    if (!checkForSaveList()) {
+        return
+    }
+
     let name = await vscode.window.showInputBox({
         placeHolder: 'add name for the group',
         validateInput(v) {
@@ -53,12 +57,8 @@ async function save() {
     })
 
     if (name) {
-        if (!saveList.length) {
-            return showUntitledError()
-        }
-
-        if (prevUntitledItem) {
-            vscode.window.showErrorMessage('"Untitled" tabs cant be saved because they are temporary')
+        if (untitledItems.length) {
+            showUntitledError()
         }
 
         let list = getGroupsList()
@@ -116,6 +116,14 @@ async function update() {
     if (selection) {
         let index = list.findIndex((e) => e.name == selection)
         await loopOver()
+
+        if (!checkForSaveList()) {
+            return
+        }
+
+        if (untitledItems.length) {
+            showUntitledError()
+        }
 
         list[index].documents = saveList
         await saveUserLists(list)
@@ -177,25 +185,27 @@ async function loopOver() {
     let path = document.uri.fsPath
     let loop = false
 
+    async function rerun() {
+        await goNext()
+        await loopOver()
+        loop = true
+    }
+
     if (!document.isUntitled) {
         if (!inList(path)) {
             saveList.push({
                 fsPath: path,
                 column: viewColumn
             })
-            await goNext()
-            await loopOver()
-            loop = true
+            await rerun()
         }
-    } else if (prevUntitledItem != path) {
-        prevUntitledItem = path
-        await goNext()
-        await loopOver()
-        loop = true
+    } else if (!untitledItems.includes(path)) {
+        untitledItems.push(path)
+        await rerun()
     }
 
     if (!loop) {
-        return new Promise((resolve, reject) => resolve())
+        return new Promise((resolve) => resolve())
     }
 }
 
@@ -222,8 +232,7 @@ function getNamesList(arr = getGroupsList()) {
 async function saveUserLists(list) {
     await vscode.workspace.getConfiguration().update('editorLayout.list', list, config.saveToGlobal)
 
-    saveList = []
-    prevUntitledItem = null
+    return resetData()
 }
 
 async function showQuickPick(list, type) {
@@ -270,7 +279,23 @@ function getFileName(path) {
 }
 
 function showUntitledError() {
-    return vscode.window.showErrorMessage('"Untitled" tabs cant be saved because they are temporary')
+    return vscode.window.showErrorMessage(`"${untitledItems.length} Untitled" tabs cant be saved because they are temporary`)
+}
+
+function resetData() {
+    saveList = []
+    untitledItems = []
+}
+
+function checkForSaveList() {
+    if (!saveList.length) {
+        resetData()
+        showUntitledError()
+
+        return false
+    }
+
+    return true
 }
 /* -------------------------------------------------------------------------- */
 
