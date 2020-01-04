@@ -181,8 +181,6 @@ async function treeRemove(e) {
 
 /* ---------------------------------- utils --------------------------------- */
 async function loopOver() {
-    let { document, viewColumn } = vscode.window.activeTextEditor
-    let path = document.uri.fsPath
     let loop = false
 
     async function rerun() {
@@ -191,21 +189,28 @@ async function loopOver() {
         loop = true
     }
 
-    if (!document.isUntitled) {
-        if (!inList(path)) {
-            saveList.push({
-                fsPath: path,
-                column: viewColumn
-            })
+    try {
+        let { document, viewColumn } = vscode.window.activeTextEditor
+        let path = document.uri.fsPath
+
+        if (document.uri.scheme == 'file') {
+            if (!inList(path)) {
+                saveList.push({
+                    fsPath: path,
+                    column: viewColumn
+                })
+                await rerun()
+            }
+        } else if (!untitledItems.includes(path)) {
+            untitledItems.push(path)
             await rerun()
         }
-    } else if (!untitledItems.includes(path)) {
-        untitledItems.push(path)
-        await rerun()
-    }
 
-    if (!loop) {
-        return new Promise((resolve) => resolve())
+        if (!loop) {
+            return new Promise((resolve) => resolve())
+        }
+    } catch ({ message }) {
+        vscode.window.showErrorMessage(message)
     }
 }
 
@@ -279,7 +284,9 @@ function getFileName(path) {
 }
 
 function showUntitledError() {
-    return vscode.window.showErrorMessage(`"${untitledItems.length} Untitled" tabs cant be saved because they are temporary`)
+    if (untitledItems.length) {
+        return vscode.window.showErrorMessage(`"${untitledItems.length} Untitled" tabs cant be saved because they are temporary`)
+    }
 }
 
 function resetData() {
@@ -289,8 +296,8 @@ function resetData() {
 
 function checkForSaveList() {
     if (!saveList.length) {
-        resetData()
         showUntitledError()
+        resetData()
 
         return false
     }
