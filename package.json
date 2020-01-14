@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -23,30 +23,66 @@
         "commands": [
             {
                 "command": "editorLayout.save",
-                "title": "Editor Layout: save group",
+                "title": "save group",
+                "category": "Editor Layout",
                 "icon": "$(references)"
             },
             {
                 "command": "editorLayout.open",
-                "title": "Editor Layout: open group",
-                "icon": "$(telescope)"
+                "title": "open group",
+                "category": "Editor Layout",
+                "icon": "$(symbol-array)"
             },
             {
                 "command": "editorLayout.remove",
-                "title": "Editor Layout: remove group"
+                "title": "remove group",
+                "category": "Editor Layout"
             },
             {
                 "command": "editorLayout.update",
-                "title": "Editor Layout: update group"
+                "title": "update group",
+                "category": "Editor Layout"
             },
             {
                 "command": "editorLayout.openFile",
-                "title": "Editor Layout: open file"
+                "title": "open file",
+                "category": "Editor Layout"
             },
             {
                 "command": "editorLayout.treeRemove",
-                "title": "Editor Layout: remove group/file",
+                "title": "remove group/file",
                 "icon": "$(chrome-close)"
+            },
+            {
+                "command": "editorLayout.columnBelow",
+                "title": "open editor in below_group",
+                "icon": "$(chevron-down)"
+            },
+            {
+                "command": "editorLayout.columnAbove",
+                "title": "open editor in above_group",
+                "icon": "$(chevron-up)"
+            },
+            {
+                "command": "editorLayout.columnRight",
+                "title": "open editor in right_group",
+                "icon": "$(chevron-right)"
+            },
+            {
+                "command": "editorLayout.columnLeft",
+                "title": "open editor in left_group",
+                "icon": "$(chevron-left)"
+            },
+            {
+                "command": "editorLayout.closeAll",
+                "title": "close all opened editors",
+                "icon": "$(close-all)"
+            },
+            {
+                "command": "editorLayout.openSettingsFile",
+                "title": "open settings file",
+                "category": "Editor Layout",
+                "icon": "$(settings-gear)"
             }
         ],
         "menus": {
@@ -66,6 +102,26 @@
                 {
                     "command": "editorLayout.treeRemove",
                     "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnBelow",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnAbove",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnRight",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnLeft",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.closeAll",
+                    "when": "false"
                 }
             ],
             "view/title": [
@@ -78,11 +134,41 @@
                     "command": "editorLayout.save",
                     "when": "view == layouts_list && editorIsOpen",
                     "group": "navigation"
+                },
+                {
+                    "command": "editorLayout.closeAll",
+                    "when": "view == layouts_list && editorIsOpen",
+                    "group": "navigation"
+                },
+                {
+                    "command": "editorLayout.openSettingsFile",
+                    "when": "view == layouts_list",
+                    "group": "navigation"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "editorLayout.treeRemove",
+                    "when": "view == layouts_list",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnBelow",
+                    "when": "view == layouts_list",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnAbove",
+                    "when": "view == layouts_list",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnRight",
+                    "when": "view == layouts_list",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnLeft",
                     "when": "view == layouts_list",
                     "group": "inline"
                 }
@@ -106,6 +192,24 @@
                     "type": "boolean",
                     "default": false,
                     "description": "close all opened editors after saving a group"
+                },
+                "editorLayout.hideSideBarAfterOpen": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "close sidebar after opening a layout"
+                },
+                "editorLayout.layingOutType": {
+                    "type": "string",
+                    "default": "create_then_move",
+                    "enum": [
+                        "create_then_move",
+                        "move_to_available"
+                    ],
+                    "description": "chose how you want the positioning to take place",
+                    "enumDescriptions": [
+                        "run 'workbench.action.newGroup' before opening the file",
+                        "run 'workbench.action.moveEditorTo' after opening the file"
+                    ]
                 }
             }
         },

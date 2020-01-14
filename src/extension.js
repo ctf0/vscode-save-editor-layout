@@ -26,6 +26,19 @@ async function activate(context) {
     // tree
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openFile', openFile))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.treeRemove', treeRemove))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', async () => {
+        let path = await vscode.workspace.findFiles('**/.vscode/settings.json', null, 1)
+
+        showDocument({
+            fsPath: path[0].path,
+            column: 1
+        })
+    }))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.closeAll', (e) => closeAllEditors(true)))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnBelow', async (e) => await treeColumnPosition(e, 'Below')))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnAbove', async (e) => await treeColumnPosition(e, 'Above')))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnRight', async (e) => await treeColumnPosition(e, 'Right')))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnLeft', async (e) => await treeColumnPosition(e, 'Left')))
     vscode.window.createTreeView(
         'layouts_list',
         {
@@ -64,11 +77,11 @@ async function save() {
         let list = getGroupsList()
         list.push({
             "name": name,
-            "documents": saveList
+            "documents": sortList(saveList)
         })
 
         await saveUserLists(list)
-        await vscode.window.showInformationMessage(`"${name}" group saved`)
+        showMsg(`"${name}" group saved`)
 
         return closeAllEditors()
     }
@@ -81,11 +94,28 @@ async function open() {
 
     if (selection) {
         let group = list.find((e) => e.name == selection)
-        let docs = sortList(group.documents)
+        let docs = group.documents
+        let create_then_move = config.layingOutType == 'create_then_move'
 
-        for (const item of docs) {
+        if (config.hideSideBarAfterOpen) {
+            await runCommand('workbench.action.focusSideBar')
+            await runCommand('workbench.action.toggleSidebarVisibility')
+        }
+
+        for (let i = 0; i < docs.length; i++) {
+            const item = docs[i]
+
             try {
+                if (item.position && create_then_move) {
+                    await runCommand(`workbench.action.newGroup${item.position}`)
+                }
+
                 await showDocument(item)
+
+                if (item.position && !create_then_move) {
+                    await runCommand(`workbench.action.moveEditorTo${item.position}Group`)
+                }
+
             } catch ({ message }) {
                 continue
             }
@@ -105,7 +135,7 @@ async function remove(e) {
 
     await saveUserLists(list)
 
-    return vscode.window.showInformationMessage(`"${selection}" group removed`)
+    return showMsg(`"${selection}" group removed`)
 }
 
 async function update() {
@@ -127,7 +157,7 @@ async function update() {
 
         list[index].documents = saveList
         await saveUserLists(list)
-        await vscode.window.showInformationMessage(`"${selection}" group updated`)
+        showMsg(`"${selection}" group updated`)
 
         return closeAllEditors()
     }
@@ -140,6 +170,7 @@ function openFile(path, column) {
     })
 }
 
+/* Tree --------------------------------------------------------------------- */
 async function treeRemove(e) {
     const { group, path } = e
     let list = getGroupsList()
@@ -165,9 +196,7 @@ async function treeRemove(e) {
         if (changes) {
             await saveUserLists(list)
 
-            return vscode.window.showInformationMessage(
-                `"${name}" removed , "${group}" group updated`
-            )
+            return showMsg(`"${name}" removed , "${group}" group updated`)
         }
     } else {
         let index = list.findIndex((e) => e.name == group)
@@ -175,8 +204,31 @@ async function treeRemove(e) {
 
         await saveUserLists(list)
 
-        return vscode.window.showInformationMessage(`"${group}" group removed`)
+        return showMsg(`"${group}" group removed`)
     }
+}
+
+async function treeColumnPosition(e, type) {
+    const { group, path } = e
+
+    if (!path) {
+        return showMsg('sorry, works with files only !')
+    }
+
+    let name = getFileName(path)
+    let list = getGroupsList()
+    let index = list.findIndex((e) => e.name == group)
+    list[index].documents = list[index].documents.map((item, i) => {
+        if (item.fsPath == path) {
+            item.position = item.position == type ? null : type
+        }
+
+        return item
+    })
+
+    await saveUserLists(list)
+
+    return showMsg(`"${group}/${name}" position updated`)
 }
 
 /* ---------------------------------- utils --------------------------------- */
@@ -210,13 +262,13 @@ async function loopOver() {
             return new Promise((resolve) => resolve())
         }
     } catch ({ message }) {
-        vscode.window.showErrorMessage(message)
+        showMsg(message, true)
         await rerun()
     }
 }
 
 async function goNext() {
-    return vscode.commands.executeCommand('workbench.action.nextEditor')
+    return runCommand('workbench.action.nextEditor')
 }
 
 function inList(path) {
@@ -266,7 +318,7 @@ async function showDocument({ fsPath, column }) {
             preview: false
         })
     } catch ({ message }) {
-        vscode.window.showErrorMessage(message)
+        showMsg(message, true)
     }
 }
 
@@ -274,10 +326,14 @@ async function readConfig() {
     return config = await vscode.workspace.getConfiguration('editorLayout')
 }
 
-async function closeAllEditors() {
-    return config.closeEditorsAfterSave
-        ? vscode.commands.executeCommand('workbench.action.closeAllEditors')
-        : false
+async function closeAllEditors(force = false) {
+    if (config.closeEditorsAfterSave || force) {
+        await runCommand('workbench.action.closeAllEditors')
+
+        return runCommand('workbench.action.editorLayoutSingle')
+    }
+
+    return false
 }
 
 function getFileName(path) {
@@ -286,7 +342,7 @@ function getFileName(path) {
 
 function showUntitledError() {
     if (untitledItems.length) {
-        return vscode.window.showErrorMessage(`"${untitledItems.length} Untitled" tabs cant be saved because they are temporary`)
+        return showMsg(`"${untitledItems.length} Untitled" tabs cant be saved because they are temporary`, true)
     }
 }
 
@@ -304,6 +360,16 @@ function checkForSaveList() {
     }
 
     return true
+}
+
+function showMsg(msg, error = false) {
+    return error
+        ? vscode.window.showErrorMessage(`FSC: ${msg}`)
+        : vscode.window.showInformationMessage(`FSC: ${msg}`)
+}
+
+async function runCommand(cmnd) {
+    return vscode.commands.executeCommand(cmnd)
 }
 /* -------------------------------------------------------------------------- */
 

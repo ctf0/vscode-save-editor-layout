@@ -1,0 +1,21 @@
+{
+    "editorLayout.list": [
+        {
+            "name": "demo",
+            "documents": [
+                {
+                    "fsPath": "/Users/koka/Public/GitHub/vscode-save-editor-layout/src/TreeProvider.js",
+                    "column": 1
+                },
+                {
+                    "fsPath": "/Users/koka/Public/GitHub/vscode-save-editor-layout/package.json",
+                    "column": 1
+                },
+                {
+                    "fsPath": "/Users/koka/Public/GitHub/vscode-save-editor-layout/src/extension.js",
+                    "column": 1
+                }
+            ]
+        }
+    ]
+}

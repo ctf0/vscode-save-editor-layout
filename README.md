@@ -17,4 +17,4 @@
     > The column in which this editor shows. Will be undefined in case this isn't one of the main editors,<br>
     > e.g. an embedded editor, or when the editor column is larger than three.
 
-- vscode doesnt give info about the column position ex.`right,left,top,bottom` nor for nested grid groups, so on reopening the editors, they will open next to eachother
+- vscode doesn't give info about the column position ex.`right,left,top,bottom` nor for nested grid groups, so on reopening the editors, they will open next to eachother

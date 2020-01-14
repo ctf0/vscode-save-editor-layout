@@ -28,11 +28,14 @@ class TreeProvider {
                 `${group} (${docs.length} items)`,
                 docs.map((doc) => {
                     let path = doc.fsPath
+                    let label = doc.position
+                        ? `${this.getFileName(path)} (${doc.position})`
+                        : this.getFileName(path)
 
                     return new TreeGroupItem(
                         group,
                         path,
-                        this.getFileName(path),
+                        label,
                         {
                             command: 'editorLayout.openFile',
                             title: 'Execute',
