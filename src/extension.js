@@ -27,6 +27,10 @@ async function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openFile', openFile))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.treeRemove', treeRemove))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', async () => {
+        if (config.saveToGlobal) {
+            return runCommand('workbench.action.openSettingsJson')
+        }
+
         let path = await vscode.workspace.findFiles('**/.vscode/settings.json', null, 1)
 
         showDocument({
