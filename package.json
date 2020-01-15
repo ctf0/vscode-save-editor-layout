@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -154,22 +154,22 @@
                 },
                 {
                     "command": "editorLayout.columnBelow",
-                    "when": "view == layouts_list",
+                    "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 },
                 {
                     "command": "editorLayout.columnAbove",
-                    "when": "view == layouts_list",
+                    "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 },
                 {
                     "command": "editorLayout.columnRight",
-                    "when": "view == layouts_list",
+                    "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 },
                 {
                     "command": "editorLayout.columnLeft",
-                    "when": "view == layouts_list",
+                    "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 }
             ]

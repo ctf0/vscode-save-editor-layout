@@ -214,11 +214,6 @@ async function treeRemove(e) {
 
 async function treeColumnPosition(e, type) {
     const { group, path } = e
-
-    if (!path) {
-        return showMsg('sorry, works with files only !')
-    }
-
     let name = getFileName(path)
     let list = getGroupsList()
     let index = list.findIndex((e) => e.name == group)

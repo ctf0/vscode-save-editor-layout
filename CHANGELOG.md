@@ -13,3 +13,7 @@
 - new configs
     + hideSideBarAfterOpen
     + layingOutType
+
+### 0.0.7
+
+- remove the position btns from the view group parent

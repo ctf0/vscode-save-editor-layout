@@ -98,6 +98,7 @@ class TreeGroupItem extends vscode.TreeItem {
         this.command = command
         this.tooltip = `open file "${path}"`
         this.iconPath = vscode.ThemeIcon.File
+        this.contextValue = 'child'
     }
 }
 
