@@ -1,5 +1,6 @@
 const vscode = require('vscode')
 const { TreeProvider } = require('./TreeProvider')
+const fs = require('fs')
 
 let untitledItems = []
 let saveList = []
@@ -31,12 +32,21 @@ async function activate(context) {
             return runCommand('workbench.action.openSettingsJson')
         }
 
-        let path = await vscode.workspace.findFiles('**/.vscode/settings.json', null, 1)
+        let root = await vscode.workspace.workspaceFolders
 
-        showDocument({
-            fsPath: path[0].path,
-            column: 1
-        })
+        if (root.length) {
+            let path = root[0].uri.path + '/.vscode/settings.json'
+
+            if (fs.existsSync(path)) {
+                showDocument({
+                    fsPath: path,
+                    column: 1
+                })
+            } else {
+                showMsg(`file not found "${path}"`, true)
+                runCommand('workbench.action.openSettingsJson')
+            }
+        }
     }))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.closeAll', (e) => closeAllEditors(true)))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnBelow', async (e) => await treeColumnPosition(e, 'Below')))
@@ -317,7 +327,7 @@ async function showDocument({ fsPath, column }) {
             preview: false
         })
     } catch ({ message }) {
-        showMsg(message, true)
+        showMsg(`cant open file "${fsPath}"`, true)
     }
 }
 
