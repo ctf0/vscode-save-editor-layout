@@ -27,27 +27,7 @@ async function activate(context) {
     // tree
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openFile', openFile))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.treeRemove', treeRemove))
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', async () => {
-        if (config.saveToGlobal) {
-            return runCommand('workbench.action.openSettingsJson')
-        }
-
-        let root = await vscode.workspace.workspaceFolders
-
-        if (root.length) {
-            let path = root[0].uri.path + '/.vscode/settings.json'
-
-            if (fs.existsSync(path)) {
-                showDocument({
-                    fsPath: path,
-                    column: 1
-                })
-            } else {
-                showMsg(`file not found "${path}"`, true)
-                runCommand('workbench.action.openSettingsJson')
-            }
-        }
-    }))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', openSettingsFile))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.closeAll', (e) => closeAllEditors(true)))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnBelow', async (e) => await treeColumnPosition(e, 'Below')))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnAbove', async (e) => await treeColumnPosition(e, 'Above')))
@@ -238,6 +218,28 @@ async function treeColumnPosition(e, type) {
     await saveUserLists(list)
 
     return showMsg(`"${group}/${name}" position updated`)
+}
+
+async function openSettingsFile(e) {
+    if (config.saveToGlobal) {
+        return runCommand('workbench.action.openSettingsJson')
+    }
+
+    let root = await vscode.workspace.workspaceFolders
+
+    if (root.length) {
+        let path = root[0].uri.path + '/.vscode/settings.json'
+
+        if (fs.existsSync(path)) {
+            showDocument({
+                fsPath: path,
+                column: 1
+            })
+        } else {
+            showMsg(`file not found "${path}"`, true)
+            runCommand('workbench.action.openSettingsJson')
+        }
+    }
 }
 
 /* ---------------------------------- utils --------------------------------- */
