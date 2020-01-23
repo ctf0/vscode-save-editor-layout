@@ -2,12 +2,13 @@ const vscode = require('vscode')
 class TreeProvider {
 
     data
+
     _onDidChangeTreeData = new vscode.EventEmitter()
     onDidChangeTreeData = this._onDidChangeTreeData.event
 
     constructor() {
         vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration('editorLayout.list')) {
+            if (e.affectsConfiguration('saveEditorLayout.list')) {
                 this._onDidChangeTreeData.fire()
                 this.getList()
             }
@@ -17,7 +18,7 @@ class TreeProvider {
     }
 
     async getList() {
-        let list = await vscode.workspace.getConfiguration('editorLayout').list
+        let list = await vscode.workspace.getConfiguration('saveEditorLayout').list
 
         this.data = list.map((item) => {
             let group = item.name

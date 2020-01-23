@@ -13,7 +13,7 @@ async function activate(context) {
     await readConfig()
 
     vscode.workspace.onDidChangeConfiguration(async (e) => {
-        if (e.affectsConfiguration('editorLayout')) {
+        if (e.affectsConfiguration('saveEditorLayout')) {
             await readConfig()
         }
     })
@@ -299,7 +299,7 @@ function getNamesList(arr = getGroupsList()) {
 }
 
 async function saveUserLists(list) {
-    await vscode.workspace.getConfiguration().update('editorLayout.list', list, config.saveToGlobal)
+    await vscode.workspace.getConfiguration().update('saveEditorLayout.list', list, config.saveToGlobal)
 
     return resetData()
 }
@@ -334,7 +334,7 @@ async function showDocument({ fsPath, column }) {
 }
 
 async function readConfig() {
-    return config = await vscode.workspace.getConfiguration('editorLayout')
+    return config = await vscode.workspace.getConfiguration('saveEditorLayout')
 }
 
 async function closeAllEditors(force = false) {

@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -24,29 +24,29 @@
             {
                 "command": "editorLayout.save",
                 "title": "save group",
-                "category": "Editor Layout",
+                "category": "Save Editor Layout",
                 "icon": "$(references)"
             },
             {
                 "command": "editorLayout.open",
                 "title": "open group",
-                "category": "Editor Layout",
+                "category": "Save Editor Layout",
                 "icon": "$(symbol-array)"
             },
             {
                 "command": "editorLayout.remove",
                 "title": "remove group",
-                "category": "Editor Layout"
+                "category": "Save Editor Layout"
             },
             {
                 "command": "editorLayout.update",
                 "title": "update group",
-                "category": "Editor Layout"
+                "category": "Save Editor Layout"
             },
             {
                 "command": "editorLayout.openFile",
                 "title": "open file",
-                "category": "Editor Layout"
+                "category": "Save Editor Layout"
             },
             {
                 "command": "editorLayout.treeRemove",
@@ -81,7 +81,7 @@
             {
                 "command": "editorLayout.openSettingsFile",
                 "title": "open settings file",
-                "category": "Editor Layout",
+                "category": "Save Editor Layout",
                 "icon": "$(settings-gear)"
             }
         ],
@@ -175,30 +175,30 @@
             ]
         },
         "configuration": {
-            "title": "Editor Layout",
+            "title": "Save Editor Layout",
             "type": "object",
             "properties": {
-                "editorLayout.list": {
+                "saveEditorLayout.list": {
                     "type": "array",
                     "default": [],
                     "description": "groups"
                 },
-                "editorLayout.saveToGlobal": {
+                "saveEditorLayout.saveToGlobal": {
                     "type": "boolean",
                     "default": false,
                     "description": "save groups globally or per workspace"
                 },
-                "editorLayout.closeEditorsAfterSave": {
+                "saveEditorLayout.closeEditorsAfterSave": {
                     "type": "boolean",
                     "default": false,
                     "description": "close all opened editors after saving a group"
                 },
-                "editorLayout.hideSideBarAfterOpen": {
+                "saveEditorLayout.hideSideBarAfterOpen": {
                     "type": "boolean",
                     "default": true,
                     "description": "close sidebar after opening a layout"
                 },
-                "editorLayout.layingOutType": {
+                "saveEditorLayout.layingOutType": {
                     "type": "string",
                     "default": "create_then_move",
                     "enum": [
@@ -217,7 +217,7 @@
             "activitybar": [
                 {
                     "id": "editor-layouts",
-                    "title": "Editor Layout Groups",
+                    "title": "Save Editor Layout",
                     "icon": "img/icon.svg"
                 }
             ]

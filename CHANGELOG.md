@@ -17,3 +17,7 @@
 ### 0.0.7
 
 - remove the position btns from the view group parent
+
+### 0.0.9
+
+- change config display name to `Save Editor Layout` to avoid confusion with vscode nameing, also the config is now `saveEditorLayout.list` instead of `editorLayout.list`
