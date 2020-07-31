@@ -256,7 +256,7 @@ async function loopOver() {
         let { document, viewColumn } = vscode.window.activeTextEditor
         let path = document.uri.fsPath
 
-        if (document.fileName.includes('/')) {
+        if (!document.isUntitled) {
             if (!inList(path)) {
                 saveList.push({
                     fsPath: path,

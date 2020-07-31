@@ -21,3 +21,7 @@
 ### 0.0.9
 
 - change config display name to `Save Editor Layout` to avoid confusion with vscode nameing, also the config is now `saveEditorLayout.list` instead of `editorLayout.list`
+
+### 0.1.0
+
+- better api to check for untitled files

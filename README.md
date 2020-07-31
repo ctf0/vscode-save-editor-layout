@@ -10,6 +10,7 @@
 ### Notes
 
 - "Untitled" tabs are not saved because they are temporary by nature
+- vote on https://github.com/microsoft/vscode/issues/88612 for better api
 
 ### Limitations
 
