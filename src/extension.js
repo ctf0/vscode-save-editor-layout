@@ -1,6 +1,7 @@
 const vscode = require('vscode')
-const { TreeProvider } = require('./TreeProvider')
+const {TreeProvider} = require('./TreeProvider')
 const fs = require('fs')
+const {PACKAGE_NAME} = require('./util')
 
 let untitledItems = []
 let saveList = []
@@ -13,7 +14,7 @@ async function activate(context) {
     await readConfig()
 
     vscode.workspace.onDidChangeConfiguration(async (e) => {
-        if (e.affectsConfiguration('saveEditorLayout')) {
+        if (e.affectsConfiguration(PACKAGE_NAME)) {
             await readConfig()
         }
     })
@@ -36,8 +37,8 @@ async function activate(context) {
     vscode.window.createTreeView(
         'layouts_list',
         {
-            treeDataProvider: new TreeProvider(),
-            showCollapseAll: true
+            treeDataProvider : new TreeProvider(),
+            showCollapseAll  : true
         }
     )
 }
@@ -70,8 +71,8 @@ async function save() {
 
         let list = getGroupsList()
         list.push({
-            "name": name,
-            "documents": sortList(saveList)
+            'name'      : name,
+            'documents' : sortList(saveList)
         })
 
         await saveUserLists(list)
@@ -110,7 +111,7 @@ async function open() {
                     await runCommand(`workbench.action.moveEditorTo${item.position}Group`)
                 }
 
-            } catch ({ message }) {
+            } catch ({message}) {
                 continue
             }
         }
@@ -159,14 +160,14 @@ async function update() {
 
 function openFile(path, column) {
     return showDocument({
-        fsPath: path,
-        column: column
+        fsPath : path,
+        column : column
     })
 }
 
 /* Tree --------------------------------------------------------------------- */
 async function treeRemove(e) {
-    const { group, path } = e
+    const {group, path} = e
     let list = getGroupsList()
 
     if (path) {
@@ -203,7 +204,7 @@ async function treeRemove(e) {
 }
 
 async function treeColumnPosition(e, type) {
-    const { group, path } = e
+    const {group, path} = e
     let name = getFileName(path)
     let list = getGroupsList()
     let index = list.findIndex((e) => e.name == group)
@@ -232,8 +233,8 @@ async function openSettingsFile(e) {
 
         if (fs.existsSync(path)) {
             showDocument({
-                fsPath: path,
-                column: 1
+                fsPath : path,
+                column : 1
             })
         } else {
             showMsg(`file not found "${path}"`, true)
@@ -253,14 +254,14 @@ async function loopOver() {
     }
 
     try {
-        let { document, viewColumn } = vscode.window.activeTextEditor
+        let {document, viewColumn} = vscode.window.activeTextEditor
         let path = document.uri.fsPath
 
         if (!document.isUntitled) {
             if (!inList(path)) {
                 saveList.push({
-                    fsPath: path,
-                    column: viewColumn
+                    fsPath : path,
+                    column : viewColumn
                 })
                 await rerun()
             }
@@ -272,7 +273,7 @@ async function loopOver() {
         if (!loop) {
             return new Promise((resolve) => resolve())
         }
-    } catch ({ message }) {
+    } catch ({message}) {
         showMsg(message, true)
         await rerun()
     }
@@ -299,7 +300,7 @@ function getNamesList(arr = getGroupsList()) {
 }
 
 async function saveUserLists(list) {
-    await vscode.workspace.getConfiguration().update('saveEditorLayout.list', list, config.saveToGlobal)
+    await vscode.workspace.getConfiguration().update(`${PACKAGE_NAME}.list`, list, config.saveToGlobal)
 
     return resetData()
 }
@@ -319,22 +320,22 @@ function sortList(arr) {
     })
 }
 
-async function showDocument({ fsPath, column }) {
+async function showDocument({fsPath, column}) {
     try {
         let document = await vscode.workspace.openTextDocument(fsPath)
 
         await vscode.window.showTextDocument(document, {
-            viewColumn: column,
-            preserveFocus: false,
-            preview: false
+            viewColumn    : column,
+            preserveFocus : false,
+            preview       : false
         })
-    } catch ({ message }) {
+    } catch ({message}) {
         showMsg(`cant open file "${fsPath}"`, true)
     }
 }
 
 async function readConfig() {
-    return config = await vscode.workspace.getConfiguration('saveEditorLayout')
+    return config = await vscode.workspace.getConfiguration(PACKAGE_NAME)
 }
 
 async function closeAllEditors(force = false) {

@@ -2,11 +2,11 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
-        "vscode": "^1.41.0"
+        "vscode": "^1.51.0"
     },
     "categories": [
         "Other"
@@ -231,18 +231,15 @@
             ]
         }
     },
-    "scripts": {
-        "test": "node ./test/runTest.js"
-    },
     "devDependencies": {
-        "@types/glob": "^7.1.1",
-        "@types/mocha": "^5.2.7",
-        "@types/node": "^12.11.7",
-        "@types/vscode": "^1.41.0",
-        "eslint": "^6.6.0",
-        "glob": "^7.1.5",
-        "mocha": "^6.2.2",
-        "typescript": "^3.6.4",
-        "vscode-test": "^1.2.2"
+        "@types/glob": "^7.1.3",
+        "@types/mocha": "^8.0.4",
+        "@types/node": "^14.14.10",
+        "@types/vscode": "^1.51.0",
+        "eslint": "^7.15.0",
+        "glob": "^7.1.6",
+        "mocha": "^8.2.1",
+        "typescript": "^4.1.2",
+        "vscode-test": "^1.4.1"
     }
 }
