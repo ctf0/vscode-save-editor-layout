@@ -1,11 +1,11 @@
-const vscode = require('vscode')
+const vscode         = require('vscode')
 const {TreeProvider} = require('./TreeProvider')
-const fs = require('fs')
+const fs             = require('fs')
 const {PACKAGE_NAME} = require('./util')
 
 let untitledItems = []
-let saveList = []
-let config = {}
+let saveList      = []
+let config        = {}
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -30,10 +30,12 @@ async function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.treeRemove', treeRemove))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', openSettingsFile))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.closeAll', (e) => closeAllEditors(true)))
+
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnBelow', async (e) => await treeColumnPosition(e, 'Below')))
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnAbove', async (e) => await treeColumnPosition(e, 'Above')))
     context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnRight', async (e) => await treeColumnPosition(e, 'Right')))
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnLeft', async (e) => await treeColumnPosition(e, 'Left')))
+
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.groupVertical', async (e) => await treeGroupOrintation(e, 1)))
+    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.groupHorizontal', async (e) => await treeGroupOrintation(e, 0)))
     vscode.window.createTreeView(
         'layouts_list',
         {
@@ -71,8 +73,9 @@ async function save() {
 
         let list = getGroupsList()
         list.push({
-            'name'      : name,
-            'documents' : sortList(saveList)
+            name        : name,
+            orientation : config.defaultOrientation,
+            documents   : sortList(saveList)
         })
 
         await saveUserLists(list)
@@ -83,34 +86,63 @@ async function save() {
 }
 
 async function open() {
-    let list = getGroupsList()
-    let names = getNamesList(list)
+    let list      = getGroupsList()
+    let names     = getNamesList(list)
     let selection = await showQuickPick(names, 'open')
 
     if (selection) {
-        let group = list.find((e) => e.name == selection)
-        let docs = group.documents
-        let create_then_move = config.layingOutType == 'create_then_move'
+        let group                    = list.find((e) => e.name == selection)
+        let {documents, orientation} = group
 
         if (config.hideSideBarAfterOpen) {
             await runCommand('workbench.action.focusSideBar')
             await runCommand('workbench.action.toggleSidebarVisibility')
         }
 
-        for (let i = 0; i < docs.length; i++) {
-            const item = docs[i]
+        // setup layout
+        let groups = []
+
+        for (let i = 0; i < documents.length; i++) {
+            const item  = documents[i]
+            let current = groups[item.column - 1]
+
+            if (current) {
+                if (item.position || !current.groups.length) {
+                    current.groups.push({})
+                }
+            } else {
+                let data = {
+                    groups : [],
+                    size   : 0.5
+                }
+
+                if (item.position || !data.groups.length) {
+                    data.groups.push({})
+                }
+
+                groups.push(data)
+            }
+        }
+
+        await runCommand('vscode.setEditorLayout', {
+            orientation : orientation || 0,
+            groups      : groups
+        })
+
+        // open files
+        for (let i = 0; i < documents.length; i++) {
+            const item = documents[i]
 
             try {
-                if (item.position && create_then_move) {
-                    await runCommand(`workbench.action.newGroup${item.position}`)
-                }
+                // if (item.position) {
+                //     await runCommand(`workbench.action.newGroup${item.position}`)
+                // }
 
                 await showDocument(item)
 
-                if (item.position && !create_then_move) {
+                if (item.position) {
                     await runCommand(`workbench.action.moveEditorTo${item.position}Group`)
                 }
-
             } catch ({message}) {
                 continue
             }
@@ -119,8 +151,8 @@ async function open() {
 }
 
 async function remove(e) {
-    let list = getGroupsList()
-    let names = getNamesList(list)
+    let list      = getGroupsList()
+    let names     = getNamesList(list)
     let selection = await showQuickPick(names, 'remove')
 
     if (selection) {
@@ -134,8 +166,8 @@ async function remove(e) {
 }
 
 async function update() {
-    let list = getGroupsList()
-    let names = getNamesList(list)
+    let list      = getGroupsList()
+    let names     = getNamesList(list)
     let selection = await showQuickPick(names, 'update')
 
     if (selection) {
@@ -168,10 +200,10 @@ function openFile(path, column) {
 /* Tree --------------------------------------------------------------------- */
 async function treeRemove(e) {
     const {group, path} = e
-    let list = getGroupsList()
+    let list            = getGroupsList()
 
     if (path) {
-        let name = getFileName(path)
+        let name    = getFileName(path)
         let changes = false
 
         for (let i = 0; i < list.length; i++) {
@@ -203,14 +235,33 @@ async function treeRemove(e) {
     }
 }
 
+/**
+ * the tabs group/box
+ */
 async function treeColumnPosition(e, type) {
-    const {group, path} = e
-    let name = getFileName(path)
-    let list = getGroupsList()
-    let index = list.findIndex((e) => e.name == group)
+    const {group, path}   = e
+    let name              = getFileName(path)
+    let list              = getGroupsList()
+    let index             = list.findIndex((e) => e.name == group)
     list[index].documents = list[index].documents.map((item, i) => {
         if (item.fsPath == path) {
+            let currentPos = item.position
+
             item.position = item.position == type ? null : type
+
+            // had a position but now is = null
+            if (currentPos && !item.position) {
+                item.column++
+            }
+
+            // didn't have a position but now is = something
+            if (!currentPos && item.position) {
+                item.column--
+            }
+
+            if (item.column == 0) {
+                item.column = 1
+            }
         }
 
         return item
@@ -218,7 +269,18 @@ async function treeColumnPosition(e, type) {
 
     await saveUserLists(list)
 
-    return showMsg(`"${group}/${name}" position updated`)
+    return showMsg(`"${name}" position updated`)
+}
+
+async function treeGroupOrintation(e, type) {
+    const {group}           = e
+    let list                = getGroupsList()
+    let index               = list.findIndex((e) => e.name == group)
+    list[index].orientation = type
+
+    await saveUserLists(list)
+
+    return showMsg(`"${group}" orientation updated`)
 }
 
 async function openSettingsFile(e) {
@@ -255,7 +317,7 @@ async function loopOver() {
 
     try {
         let {document, viewColumn} = vscode.window.activeTextEditor
-        let path = document.uri.fsPath
+        let path                   = document.uri.fsPath
 
         if (!document.isUntitled) {
             if (!inList(path)) {
@@ -359,7 +421,7 @@ function showUntitledError() {
 }
 
 function resetData() {
-    saveList = []
+    saveList      = []
     untitledItems = []
 }
 
@@ -380,8 +442,8 @@ function showMsg(msg, error = false) {
         : vscode.window.showInformationMessage(`FSC: ${msg}`)
 }
 
-async function runCommand(cmnd) {
-    return vscode.commands.executeCommand(cmnd)
+async function runCommand(cmnd, args = {}) {
+    return vscode.commands.executeCommand(cmnd, args)
 }
 /* -------------------------------------------------------------------------- */
 

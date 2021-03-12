@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -54,24 +54,24 @@
                 "icon": "$(chrome-close)"
             },
             {
+                "command": "editorLayout.groupVertical",
+                "title": "set layout orintation to (vertical)",
+                "icon": "$(split-vertical)"
+            },
+            {
+                "command": "editorLayout.groupHorizontal",
+                "title": "set layout orintation to (horizontal)",
+                "icon": "$(split-horizontal)"
+            },
+            {
                 "command": "editorLayout.columnBelow",
                 "title": "open editor in below_group",
                 "icon": "$(chevron-down)"
             },
             {
-                "command": "editorLayout.columnAbove",
-                "title": "open editor in above_group",
-                "icon": "$(chevron-up)"
-            },
-            {
                 "command": "editorLayout.columnRight",
                 "title": "open editor in right_group",
                 "icon": "$(chevron-right)"
-            },
-            {
-                "command": "editorLayout.columnLeft",
-                "title": "open editor in left_group",
-                "icon": "$(chevron-left)"
             },
             {
                 "command": "editorLayout.closeAll",
@@ -104,19 +104,19 @@
                     "when": "false"
                 },
                 {
+                    "command": "editorLayout.groupVertical",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.groupHorizontal",
+                    "when": "false"
+                },
+                {
                     "command": "editorLayout.columnBelow",
                     "when": "false"
                 },
                 {
-                    "command": "editorLayout.columnAbove",
-                    "when": "false"
-                },
-                {
                     "command": "editorLayout.columnRight",
-                    "when": "false"
-                },
-                {
-                    "command": "editorLayout.columnLeft",
                     "when": "false"
                 },
                 {
@@ -153,22 +153,22 @@
                     "group": "inline"
                 },
                 {
+                    "command": "editorLayout.groupVertical",
+                    "when": "view == layouts_list && viewItem != child",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.groupHorizontal",
+                    "when": "view == layouts_list && viewItem != child",
+                    "group": "inline"
+                },
+                {
                     "command": "editorLayout.columnBelow",
                     "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 },
                 {
-                    "command": "editorLayout.columnAbove",
-                    "when": "view == layouts_list && viewItem == child",
-                    "group": "inline"
-                },
-                {
                     "command": "editorLayout.columnRight",
-                    "when": "view == layouts_list && viewItem == child",
-                    "group": "inline"
-                },
-                {
-                    "command": "editorLayout.columnLeft",
                     "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 }
@@ -196,19 +196,19 @@
                 "saveEditorLayout.hideSideBarAfterOpen": {
                     "type": "boolean",
                     "default": true,
-                    "description": "close sidebar after opening a layout"
+                    "description": "close sidebar after opening a group"
                 },
-                "saveEditorLayout.layingOutType": {
-                    "type": "string",
-                    "default": "create_then_move",
+                "saveEditorLayout.defaultOrientation": {
+                    "type": "integer",
+                    "default": 0,
                     "enum": [
-                        "create_then_move",
-                        "move_to_available"
+                        0,
+                        1
                     ],
-                    "description": "chose how you want the positioning to take place",
+                    "markdownDescription": "default layout orientation [docs](https://code.visualstudio.com/updates/v1_25#_grid-editor-layout-viewcolumn)",
                     "enumDescriptions": [
-                        "run 'workbench.action.newGroup' before opening the file",
-                        "run 'workbench.action.moveEditorTo' after opening the file"
+                        "horizontal",
+                        "vertical"
                     ]
                 }
             }

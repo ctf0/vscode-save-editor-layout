@@ -25,3 +25,10 @@
 ### 0.1.0
 
 - better api to check for untitled files
+
+### 0.2.0
+
+- better api
+- add new config `defaultOrientation` & remove `layingOutType` which was confusing
+- add option to change layout orientation vie tree list view
+- when updating the item position, item column will also be updated so we can have a correct layout
