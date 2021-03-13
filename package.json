@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -240,7 +240,7 @@
                     "default": true,
                     "description": "close sidebar after opening a group"
                 },
-                "saveAbsolutePath.saveAbsolutePath": {
+                "saveEditorLayout.saveAbsolutePath": {
                     "type": "boolean",
                     "default": true,
                     "markdownDescription": "save file path as full absolute path (if false, then save it as relative to the workspace root)"
