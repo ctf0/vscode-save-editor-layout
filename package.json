@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -54,6 +54,11 @@
                 "icon": "$(chrome-close)"
             },
             {
+                "command": "editorLayout.openGroup",
+                "title": "open group",
+                "icon": "$(folder-opened)"
+            },
+            {
                 "command": "editorLayout.groupVertical",
                 "title": "set layout orintation to (vertical)",
                 "icon": "$(split-vertical)"
@@ -64,13 +69,23 @@
                 "icon": "$(split-horizontal)"
             },
             {
+                "command": "editorLayout.columnInc",
+                "title": "column increase",
+                "icon": "$(add)"
+            },
+            {
+                "command": "editorLayout.columnSub",
+                "title": "column subtract",
+                "icon": "$(dash)"
+            },
+            {
                 "command": "editorLayout.columnBelow",
-                "title": "open editor in below_group",
+                "title": "open editor in below group",
                 "icon": "$(chevron-down)"
             },
             {
                 "command": "editorLayout.columnRight",
-                "title": "open editor in right_group",
+                "title": "open editor in right group",
                 "icon": "$(chevron-right)"
             },
             {
@@ -104,11 +119,23 @@
                     "when": "false"
                 },
                 {
+                    "command": "editorLayout.openGroup",
+                    "when": "false"
+                },
+                {
                     "command": "editorLayout.groupVertical",
                     "when": "false"
                 },
                 {
                     "command": "editorLayout.groupHorizontal",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnInc",
+                    "when": "false"
+                },
+                {
+                    "command": "editorLayout.columnSub",
                     "when": "false"
                 },
                 {
@@ -153,6 +180,11 @@
                     "group": "inline"
                 },
                 {
+                    "command": "editorLayout.openGroup",
+                    "when": "view == layouts_list && viewItem != child",
+                    "group": "inline"
+                },
+                {
                     "command": "editorLayout.groupVertical",
                     "when": "view == layouts_list && viewItem != child",
                     "group": "inline"
@@ -160,6 +192,16 @@
                 {
                     "command": "editorLayout.groupHorizontal",
                     "when": "view == layouts_list && viewItem != child",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnInc",
+                    "when": "view == layouts_list && viewItem == child",
+                    "group": "inline"
+                },
+                {
+                    "command": "editorLayout.columnSub",
+                    "when": "view == layouts_list && viewItem == child",
                     "group": "inline"
                 },
                 {
@@ -197,6 +239,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "close sidebar after opening a group"
+                },
+                "saveAbsolutePath.saveAbsolutePath": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "save file path as full absolute path (if false, then save it as relative to the workspace root)"
                 },
                 "saveEditorLayout.defaultOrientation": {
                     "type": "integer",

@@ -21,7 +21,7 @@ class TreeProvider {
         let list = await vscode.workspace.getConfiguration(PACKAGE_NAME).list
 
         this.data = list.map((item) => {
-            let {name, documents, orientation} = item
+            let {name, documents} = item
 
             return new TreeGroup(
                 name,
@@ -46,23 +46,23 @@ class TreeProvider {
     }
 
     groupText(item) {
-        return `${item.name} "${item.documents.length} / ${item.orientation == 0 ? 'horizontal' : 'vertical'}"`
+        return `${item.name} (${item.documents.length}) - ${item.orientation == 0 ? 'horizontal' : 'vertical'}`
     }
 
     itemText(path, doc) {
-        let pos = doc.position ? `pos: ${doc.position}` : null
-        let col = doc.column ? `col: ${doc.column}` : null
+        let pos = doc.position ? `pos : ${doc.position}` : null
+        let col = doc.column ? `col : ${doc.column}` : null
 
         if (pos && !col) {
-            return `${path} "${pos}"`
+            return `${path} ⓘ ${pos}`
         }
 
         if (!pos && col) {
-            return `${path} "${col}"`
+            return `${path} ⓘ ${col}`
         }
 
         if (pos && col) {
-            return `${path} "${col} / ${pos}"`
+            return `${path} ⓘ ${col} - ${pos}`
         }
 
         return path

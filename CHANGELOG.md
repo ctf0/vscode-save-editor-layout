@@ -32,3 +32,11 @@
 - add new config `defaultOrientation` & remove `layingOutType` which was confusing
 - add option to change layout orientation vie tree list view
 - when updating the item position, item column will also be updated so we can have a correct layout
+
+### 0.2.1
+
+- remove auto update column on position change, instead u will have 2 buttons `+ & -` to change the column number as needed same as position
+- add btn to open a group directly instead of choosing from the picker.
+- add support to save files as relative paths, check `saveAbsolutePath.saveAbsolutePath`
+- fix open settings files when using workspace instead of global
+- fix pkg name in notification msg

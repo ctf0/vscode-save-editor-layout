@@ -7,13 +7,21 @@
 - save editor tabs & layout.
 - save either locally `workspace` or globally `user settings`.
 - save/update/delete groups.
+- edit file column & position after save with ease.
 - most of the commands can be either done through the command palette or the activitybar view.
+
+### TODO
+
+- [ ] show confirm on group remove
+- [ ] allow to overwrite already saved groups
 
 ### Notes
 
 - "Untitled" tabs are not saved because they are temporary by nature
 - make sure to set `workbench.editor.closeEmptyGroups: false`
 - vote on https://github.com/microsoft/vscode/issues/88612 for better api
+
+---
 
 ### Limitations
 
