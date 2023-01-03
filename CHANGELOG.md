@@ -40,3 +40,10 @@
 - add support to save files as relative paths, check `saveAbsolutePath.saveAbsolutePath`
 - fix open settings files when using workspace instead of global
 - fix pkg name in notification msg
+
+### 0.3.0
+
+- use better api to collect opened tabs paths instead of looping over
+- show confirm dialog for group overwrite & removal
+- convert to TS
+- closing files will be more intelligent now, only saved tabs will be closed (unsaved & untitled will be kept open)

@@ -2,23 +2,19 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
-        "vscode": "^1.51.0"
+        "vscode": "^1.68.0"
     },
     "categories": [
         "Other"
     ],
     "activationEvents": [
-        "onView:layouts_list",
-        "onCommand:editorLayout.save",
-        "onCommand:editorLayout.open",
-        "onCommand:editorLayout.remove",
-        "onCommand:editorLayout.update"
+        "onStartupFinished"
     ],
-    "main": "./src/extension.js",
+    "main": "./out/main",
     "contributes": {
         "commands": [
             {
@@ -80,12 +76,12 @@
             },
             {
                 "command": "editorLayout.columnBelow",
-                "title": "open editor in below group",
+                "title": "open editor in below group (H)",
                 "icon": "$(chevron-down)"
             },
             {
                 "command": "editorLayout.columnRight",
-                "title": "open editor in right group",
+                "title": "open editor in right group (V)",
                 "icon": "$(chevron-right)"
             },
             {
@@ -278,15 +274,17 @@
             ]
         }
     },
+    "scripts": {
+        "vscode:prepublish": "npm run esbuild-base -- --pure:console.log --minify",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild": "npm run esbuild-base -- --sourcemap",
+        "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+        "watch": "npm run esbuild"
+    },
     "devDependencies": {
-        "@types/glob": "^7.1.3",
-        "@types/mocha": "^8.0.4",
-        "@types/node": "^14.14.10",
-        "@types/vscode": "^1.51.0",
-        "eslint": "^7.15.0",
-        "glob": "^7.1.6",
-        "mocha": "^8.2.1",
-        "typescript": "^4.1.2",
-        "vscode-test": "^1.4.1"
+        "@types/node": "^18.11.18",
+        "@types/vscode": "^1.68.0",
+        "typescript": "^4.9.4",
+        "esbuild": "^0.17.3"
     }
 }

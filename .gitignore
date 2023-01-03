@@ -1,6 +1,7 @@
+out
 node_modules
 .history
-yarn.lock
-.DS_Store
-.vscode/settings.json
 *.vsix
+.DS_Store
+package-lock.json
+yarn.lock

@@ -7,3 +7,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/.eslintrc.json
 .history
+.DS_Store
+*.vsix

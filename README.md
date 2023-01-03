@@ -10,11 +10,6 @@
 - edit file column & position after save with ease.
 - most of the commands can be either done through the command palette or the activitybar view.
 
-### TODO
-
-- [ ] show confirm on group remove
-- [ ] allow to overwrite already saved groups
-
 ### Notes
 
 - "Untitled" tabs are not saved because they are temporary by nature
