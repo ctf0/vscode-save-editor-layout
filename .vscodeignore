@@ -9,3 +9,4 @@ vsc-extension-quickstart.md
 .history
 .DS_Store
 *.vsix
+src/**
