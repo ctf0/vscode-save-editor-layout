@@ -37,7 +37,7 @@
 
 - remove auto update column on position change, instead u will have 2 buttons `+ & -` to change the column number as needed same as position
 - add btn to open a group directly instead of choosing from the picker.
-- add support to save files as relative paths, check `saveAbsolutePath.saveAbsolutePath`
+- add support to save files as relative paths, check `saveEditorLayout.saveAbsolutePath`
 - fix open settings files when using workspace instead of global
 - fix pkg name in notification msg
 
@@ -47,3 +47,8 @@
 - show confirm dialog for group overwrite & removal
 - convert to TS
 - closing files will be more intelligent now, only saved tabs will be closed (unsaved & untitled will be kept open)
+
+### 1.0.0
+
+- use the new api to correctly save the layout, require vscode v1.77.0
+- cleanup

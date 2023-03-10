@@ -1,9 +1,6 @@
-import fs_path from 'node:path';
 import vscode from 'vscode';
 import TreeProvider from './TreeProvider';
 import * as utils from './util';
-
-let ws: any = null;
 
 export async function activate(context: vscode.ExtensionContext) {
     utils.readConfig();
@@ -14,26 +11,20 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    // normal
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.save', save));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.open', open));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.remove', remove));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.update', update));
+    context.subscriptions.push(
+        // normal
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.save`, save),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.open`, open),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.remove`, remove),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.update`, update),
+        // tree
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.openFile`, openFile),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.openGroup`, openGroup),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.openSettingsFile`, openSettingsFile),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.closeAll`, (e) => closeAllEditors(true)),
+        vscode.commands.registerCommand(`${utils.CMND_NAME}.treeRemove`, treeRemoveFileOrGroup),
+    );
 
-    // tree
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openFile', openFile));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openGroup', openGroup));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.openSettingsFile', openSettingsFile));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.closeAll', (e) => closeAllEditors(true)));
-
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.treeRemove', treeRemoveFileOrGroup));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnBelow', async (e) => await treeColumnPosition(e, 'Below')));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnRight', async (e) => await treeColumnPosition(e, 'Right')));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnInc', async (e) => await treeColumnNumber(e, +1)));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.columnSub', async (e) => await treeColumnNumber(e, -1)));
-
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.groupVertical', async (e) => await treeGroupOrintation(e, 1)));
-    context.subscriptions.push(vscode.commands.registerCommand('editorLayout.groupHorizontal', async (e) => await treeGroupOrintation(e, 0)));
     vscode.window.createTreeView(
         'layouts_list',
         {
@@ -49,6 +40,8 @@ async function save() {
     let type = 'saved';
 
     if (!tabs.length) {
+        await showMsg('untitled tabs cant be saved');
+
         return;
     }
 
@@ -72,6 +65,8 @@ async function save() {
             column : tab.group.viewColumn,
         }));
 
+        const editorGroupLayout: any = await runCommand('vscode.getEditorLayout');
+
         if (found) {
             const answer = await showMsg(`this will overwrite the '${name}' group`, true, ['Yes', 'No']);
 
@@ -79,17 +74,17 @@ async function save() {
                 return;
             } else {
                 found = Object.assign(found, {
-                    orientation : utils.config.defaultOrientation,
-                    documents   : sortedSaveList,
+                    documents : sortedSaveList,
+                    layout    : editorGroupLayout,
                 });
 
                 type = 'updated';
             }
         } else {
             list.push({
-                name        : name,
-                orientation : utils.config.defaultOrientation,
-                documents   : sortedSaveList,
+                name      : name,
+                documents : sortedSaveList,
+                layout    : editorGroupLayout,
             });
         }
 
@@ -112,7 +107,7 @@ async function open(groupName = null) {
 
     if (selection) {
         const group = list.find((e) => e.name == selection);
-        const { documents, orientation } = group;
+        const { documents, layout } = group;
 
         if (utils.config.hideSideBarAfterOpen) {
             await runCommand('workbench.action.focusSideBar');
@@ -120,46 +115,15 @@ async function open(groupName = null) {
         }
 
         // setup layout
-        const groups: any = [];
-
-        for (let i = 0; i < documents.length; i++) {
-            const item = documents[i];
-            const current = groups[item.column - 1];
-
-            if (current) {
-                if (item.position || !current.groups.length) {
-                    current.groups.push({});
-                }
-            } else {
-                const data: any = {
-                    groups : [],
-                    size   : 0.5,
-                };
-
-                if (item.position || !data.groups.length) {
-                    data.groups.push({});
-                }
-
-                groups.push(data);
-            }
-        }
-
-        await runCommand('vscode.setEditorLayout', {
-            orientation : orientation || 0,
-            groups      : groups,
-        });
+        await runCommand('vscode.setEditorLayout', layout);
 
         // open files
-        for (let i = 0; i < documents.length; i++) {
-            const item = documents[i];
-
+        for (const document of documents) {
             try {
-                await showDocument(item);
-
-                if (item.position) {
-                    await runCommand(`workbench.action.moveEditorTo${item.position}Group`);
-                }
+                await showDocument(document);
             } catch ({ message }) {
+                // console.error(message);
+
                 continue;
             }
         }
@@ -249,72 +213,6 @@ async function removeGroup(list: any, group: string) {
     }
 }
 
-function treeColumnResolve(e) {
-    const { group, path } = e;
-    const list = getGroupsList();
-
-    return {
-        path  : path,
-        name  : utils.getFileName(path),
-        list  : list,
-        index : list.findIndex((e) => e.name == group),
-    };
-}
-
-async function treeColumnPosition(e, type) {
-    const { path, name, list, index } = treeColumnResolve(e);
-
-    list[index].documents = list[index].documents.map((item, i) => {
-        if (item.fsPath == path) {
-            item.position = item.position == type ? null : type;
-        }
-
-        return item;
-    });
-
-    await saveUserLists(list);
-
-    return showMsg(`"${name}" position updated`);
-}
-
-async function treeColumnNumber(e, amount) {
-    const { path, name, list, index } = treeColumnResolve(e);
-    let err = false;
-
-    let docs = list[index].documents;
-    docs = docs.map(async (item, i) => {
-        if (item.fsPath == path) {
-            if (item.column == 1 && amount < 0) {
-                err = true;
-                await showMsg(`"${name}" column cant be '0'`, err);
-
-                return item;
-            } else {
-                item.column = item.column + amount;
-            }
-        }
-
-        return item;
-    });
-
-    if (!err) {
-        await saveUserLists(list);
-
-        return showMsg(`"${name}" column updated`);
-    }
-}
-
-async function treeGroupOrintation(e, type) {
-    const { group } = e;
-    const list = getGroupsList();
-    const index = list.findIndex((e) => e.name == group);
-    list[index].orientation = type;
-
-    await saveUserLists(list);
-
-    return showMsg(`"${group}" orientation updated`);
-}
-
 async function openSettingsFile(e) {
     return utils.config.saveToGlobal
         ? runCommand('workbench.action.openSettingsJson')
@@ -354,6 +252,7 @@ async function showQuickPick(list, type) {
 function sortList(arr: vscode.Tab[]) {
     return arr.sort((a: vscode.Tab, b: vscode.Tab) => {
         if (a.group.viewColumn > b.group.viewColumn) return 1;
+
         if (b.group.viewColumn > a.group.viewColumn) return -1;
 
         return 0;
@@ -361,14 +260,8 @@ function sortList(arr: vscode.Tab[]) {
 }
 
 async function showDocument({ fsPath, column }) {
-    ws = ws || vscode.workspace.workspaceFolders;
-
-    const file = fs_path.isAbsolute(fsPath)
-        ? fsPath
-        : ws.length ? ws[0].uri.path + `/${fsPath}` : fsPath;
-
     try {
-        const document = await vscode.workspace.openTextDocument(file);
+        const document = await vscode.workspace.openTextDocument(fsPath);
 
         return vscode.window.showTextDocument(document, {
             viewColumn    : column,
@@ -376,7 +269,7 @@ async function showDocument({ fsPath, column }) {
             preview       : false,
         });
     } catch ({ message }) {
-        return showMsg(`cant open file "${file}"`, true);
+        return showMsg(`cant open file "${fsPath}"`, true);
     }
 }
 

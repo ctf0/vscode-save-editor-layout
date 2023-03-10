@@ -18,7 +18,7 @@ export default class TreeProvider {
     }
 
     async getList() {
-        const list = await vscode.workspace.getConfiguration(utils.PACKAGE_NAME).list;
+        const list = utils.config.list;
 
         this.data = list.map((item) => {
             const { name, documents } = item;
@@ -28,12 +28,11 @@ export default class TreeProvider {
                 this.groupText(item),
                 documents.map((doc) => {
                     const path = doc.fsPath;
-                    const label = this.itemText(utils.getFileName(path), doc);
 
                     return new TreeGroupItem(
                         name,
                         path,
-                        label,
+                        utils.getFileName(path),
                         {
                             command   : 'editorLayout.openFile',
                             title     : 'Execute',
@@ -46,26 +45,7 @@ export default class TreeProvider {
     }
 
     groupText(item) {
-        return `${item.name} (${item.documents.length}) - ${item.orientation == 0 ? 'horizontal' : 'vertical'}`;
-    }
-
-    itemText(path, doc) {
-        const pos = doc.position ? `pos : ${doc.position}` : null;
-        const col = doc.column ? `col : ${doc.column}` : null;
-
-        if (pos && !col) {
-            return `${path} ⓘ ${pos}`;
-        }
-
-        if (!pos && col) {
-            return `${path} ⓘ ${col}`;
-        }
-
-        if (pos && col) {
-            return `${path} ⓘ ${col} - ${pos}`;
-        }
-
-        return path;
+        return `${item.name} (${item.documents.length})`;
     }
 
     /* -------------------------------------------------------------------------- */
