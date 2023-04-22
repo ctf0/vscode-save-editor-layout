@@ -5,13 +5,13 @@ import * as utils from './util';
 export async function activate(context: vscode.ExtensionContext) {
     utils.readConfig();
 
-    vscode.workspace.onDidChangeConfiguration(async (e) => {
-        if (e.affectsConfiguration(utils.PACKAGE_NAME)) {
-            utils.readConfig();
-        }
-    });
-
     context.subscriptions.push(
+        // config
+        vscode.workspace.onDidChangeConfiguration(async (e) => {
+            if (e.affectsConfiguration(utils.PACKAGE_NAME)) {
+                utils.readConfig();
+            }
+        }),
         // normal
         vscode.commands.registerCommand(`${utils.CMND_NAME}.save`, save),
         vscode.commands.registerCommand(`${utils.CMND_NAME}.open`, open),
@@ -59,11 +59,7 @@ async function save() {
     if (name) {
         const list = getGroupsList();
         let found = list.find((item) => item.name == name);
-        const sortedSaveList = sortList(tabs).map((tab: vscode.Tab) => ({
-            // @ts-ignore
-            fsPath : tab.input.uri.fsPath,
-            column : tab.group.viewColumn,
-        }));
+        const sortedSaveList = getSortedSaveList(tabs);
 
         const editorGroupLayout: any = await runCommand('vscode.getEditorLayout');
 
@@ -92,6 +88,15 @@ async function save() {
         await closeAllEditors();
         await showMsg(`"${name}" group ${type}`);
     }
+}
+
+function getSortedSaveList(tabs = null) {
+    return sortList(tabs || getOpenedTabsWithoutUntitled()).map((tab: vscode.Tab) => ({
+        // @ts-ignore
+        fsPath : tab.input.uri.fsPath,
+        column : tab.group.viewColumn,
+        pinned : tab.isPinned,
+    }));
 }
 
 async function open(groupName = null) {
@@ -152,7 +157,11 @@ async function update() {
     if (selection) {
         const index = list.findIndex((e) => e.name == selection);
 
-        list[index].documents = getOpenedTabs();
+        list[index] = Object.assign(list[index], {
+            documents : getSortedSaveList(),
+            layout    : await runCommand('vscode.getEditorLayout'),
+        });
+
         await saveUserLists(list);
         await showMsg(`"${selection}" group updated`);
 
@@ -160,10 +169,11 @@ async function update() {
     }
 }
 
-function openFile(path, column) {
+function openFile(doc) {
     return showDocument({
-        fsPath : path,
-        column : column,
+        fsPath : doc.fsPath,
+        column : doc.column,
+        pinned : doc.pinned || false,
     });
 }
 
@@ -259,17 +269,21 @@ function sortList(arr: vscode.Tab[]) {
     });
 }
 
-async function showDocument({ fsPath, column }) {
+async function showDocument(doc) {
     try {
-        const document = await vscode.workspace.openTextDocument(fsPath);
+        const document = await vscode.workspace.openTextDocument(doc.fsPath);
 
-        return vscode.window.showTextDocument(document, {
-            viewColumn    : column,
+        await vscode.window.showTextDocument(document, {
+            viewColumn    : doc.column,
             preserveFocus : false,
             preview       : false,
         });
+
+        if (doc.pinned) {
+            await runCommand('workbench.action.pinEditor');
+        }
     } catch ({ message }) {
-        return showMsg(`cant open file "${fsPath}"`, true);
+        return showMsg(`cant open file "${doc.fsPath}"`, true);
     }
 }
 

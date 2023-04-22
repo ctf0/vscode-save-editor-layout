@@ -36,7 +36,7 @@ export default class TreeProvider {
                         {
                             command   : 'editorLayout.openFile',
                             title     : 'Execute',
-                            arguments : [path, doc.column],
+                            arguments : [doc],
                         },
                     );
                 }),
@@ -85,8 +85,8 @@ class TreeGroup extends vscode.TreeItem {
 }
 
 class TreeGroupItem extends vscode.TreeItem {
-    path;
     group;
+    path;
 
     constructor(
         group,

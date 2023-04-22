@@ -52,3 +52,8 @@
 
 - use the new api to correctly save the layout, require vscode v1.77.0
 - cleanup
+
+### 2.0.0
+
+- support pinned tabs [#8](https://github.com/ctf0/vscode-save-editor-layout/issues/8)
+- fix updating a group not counting for the layout changes

@@ -12,4 +12,3 @@
 ### Notes
 
 - "Untitled" tabs are not saved because they are temporary by nature
-- make sure to set `workbench.editor.closeEmptyGroups: false`
