@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -151,6 +151,16 @@
                     "type": "boolean",
                     "default": true,
                     "description": "close sidebar after opening a group"
+                },
+                "saveEditorLayout.saveToGlobalWhenPossible": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "save group globally when no workspace is opened\n\n require `#saveEditorLayout.saveToGlobal#` to be set to false"
+                },
+                "saveEditorLayout.restoreLayoutOnly": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "restore layout only without opening any files"
                 }
             }
         },
@@ -180,9 +190,9 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^20.8.3",
+        "@types/node": "^20.9.0",
         "@types/vscode": "^1.80.0",
         "typescript": "^5.2.2",
-        "esbuild": "^0.19.4"
+        "esbuild": "^0.19.5"
     }
 }

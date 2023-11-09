@@ -84,7 +84,12 @@ async function save() {
             });
         }
 
-        await saveUserLists(list);
+        try {
+            await saveUserLists(list);
+        } catch (error) {
+            await saveUserLists(list, utils.config.saveToGlobalWhenPossible);
+        }
+
         await closeAllEditors();
         await showMsg(`"${name}" group ${type}`);
     }
@@ -123,13 +128,15 @@ async function open(groupName = null) {
         await runCommand('vscode.setEditorLayout', layout);
 
         // open files
-        for (const document of documents) {
-            try {
-                await showDocument(document);
-            } catch ({ message }) {
-                // console.error(message);
+        if (utils.config.restoreLayoutOnly == false) {
+            for (const document of documents) {
+                try {
+                    await showDocument(document);
+                } catch ({ message }) {
+                    // console.error(message);
 
-                continue;
+                    continue;
+                }
             }
         }
     }
@@ -238,8 +245,8 @@ function getNamesList(arr = getGroupsList()) {
     return arr.map((item) => item.name);
 }
 
-async function saveUserLists(list) {
-    return vscode.workspace.getConfiguration().update(`${utils.PACKAGE_NAME}.list`, list, utils.config.saveToGlobal);
+async function saveUserLists(list, forceGlobal = false) {
+    return vscode.workspace.getConfiguration().update(`${utils.PACKAGE_NAME}.list`, list, utils.config.saveToGlobal || forceGlobal);
 }
 
 function getOpenedTabs() {

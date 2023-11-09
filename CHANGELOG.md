@@ -57,3 +57,7 @@
 
 - support pinned tabs [#8](https://github.com/ctf0/vscode-save-editor-layout/issues/8)
 - fix updating a group not counting for the layout changes
+
+### 2.0.1
+
+- add new configs `restoreLayoutOnly` [#9](https://github.com/ctf0/vscode-save-editor-layout/issues/9) & `saveToGlobalWhenPossible`
