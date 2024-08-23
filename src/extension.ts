@@ -28,8 +28,8 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.window.createTreeView(
         'layouts_list',
         {
-            treeDataProvider : new TreeProvider(),
-            showCollapseAll  : true,
+            treeDataProvider: new TreeProvider(),
+            showCollapseAll: true,
         },
     );
 }
@@ -70,17 +70,17 @@ async function save() {
                 return;
             } else {
                 found = Object.assign(found, {
-                    documents : sortedSaveList,
-                    layout    : editorGroupLayout,
+                    documents: sortedSaveList,
+                    layout: editorGroupLayout,
                 });
 
                 type = 'updated';
             }
         } else {
             list.push({
-                name      : name,
-                documents : sortedSaveList,
-                layout    : editorGroupLayout,
+                name: name,
+                documents: sortedSaveList,
+                layout: editorGroupLayout,
             });
         }
 
@@ -98,9 +98,9 @@ async function save() {
 function getSortedSaveList(tabs = null) {
     return sortList(tabs || getOpenedTabsWithoutUntitled()).map((tab: vscode.Tab) => ({
         // @ts-ignore
-        fsPath : tab.input.uri.fsPath,
-        column : tab.group.viewColumn,
-        pinned : tab.isPinned,
+        fsPath: tab.input.uri.fsPath,
+        column: tab.group.viewColumn,
+        pinned: tab.isPinned,
     }));
 }
 
@@ -165,8 +165,8 @@ async function update() {
         const index = list.findIndex((e) => e.name == selection);
 
         list[index] = Object.assign(list[index], {
-            documents : getSortedSaveList(),
-            layout    : await runCommand('vscode.getEditorLayout'),
+            documents: getSortedSaveList(),
+            layout: await runCommand('vscode.getEditorLayout'),
         });
 
         await saveUserLists(list);
@@ -178,9 +178,9 @@ async function update() {
 
 function openFile(doc) {
     return showDocument({
-        fsPath : doc.fsPath,
-        column : doc.column,
-        pinned : doc.pinned || false,
+        fsPath: doc.fsPath,
+        column: doc.column,
+        pinned: doc.pinned || false,
     });
 }
 
@@ -251,7 +251,7 @@ async function saveUserLists(list, forceGlobal = false) {
 
 function getOpenedTabs() {
     return vscode.window.tabGroups.all
-        .flatMap((v) => v.tabs)
+        .flatMap((v: vscode.TabGroup[]) => v.tabs)
         .filter((tab: vscode.Tab) => tab.input !== undefined && tab.input instanceof vscode.TabInputText);
 }
 
@@ -262,7 +262,7 @@ function getOpenedTabsWithoutUntitled() {
 
 async function showQuickPick(list, type) {
     return vscode.window.showQuickPick(list, {
-        placeHolder: `chose a group to ${type}`,
+        placeHolder: `choose a group to ${type}`,
     });
 }
 
@@ -281,9 +281,9 @@ async function showDocument(doc) {
         const document = await vscode.workspace.openTextDocument(doc.fsPath);
 
         await vscode.window.showTextDocument(document, {
-            viewColumn    : doc.column,
-            preserveFocus : false,
-            preview       : false,
+            viewColumn: doc.column,
+            preserveFocus: false,
+            preview: false,
         });
 
         if (doc.pinned) {
