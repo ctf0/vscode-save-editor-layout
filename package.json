@@ -6,7 +6,7 @@
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
-        "vscode": "^1.80.0"
+        "vscode": "^1.100.0"
     },
     "categories": [
         "Other"
@@ -190,9 +190,9 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^22.5.0",
-        "@types/vscode": "^1.80.0",
-        "typescript": "^5.5.4",
-        "esbuild": "^0.23.1"
+        "@types/node": "^24.2.1",
+        "@types/vscode": "^1.100.0",
+        "esbuild": "^0.25.9",
+        "typescript": "^5.9.2"
     }
 }

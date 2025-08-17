@@ -1,71 +1,71 @@
-import vscode from 'vscode';
-import * as utils from './util';
+import vscode from 'vscode'
+import * as utils from './util'
 
 export default class TreeProvider {
-    data;
-    _onDidChangeTreeData = new vscode.EventEmitter();
-    onDidChangeTreeData = this._onDidChangeTreeData.event;
+    data
+    _onDidChangeTreeData = new vscode.EventEmitter()
+    onDidChangeTreeData = this._onDidChangeTreeData.event
 
     constructor() {
         vscode.workspace.onDidChangeConfiguration((e) => {
             if (e.affectsConfiguration(`${utils.PACKAGE_NAME}.list`)) {
-                this._onDidChangeTreeData.fire(undefined);
-                this.getList();
+                this._onDidChangeTreeData.fire(undefined)
+                this.getList()
             }
-        });
+        })
 
-        this.getList();
+        this.getList()
     }
 
     async getList() {
-        const list = utils.config.list;
+        const list = utils.config.list
 
         this.data = list.map((item) => {
-            const { name, documents } = item;
+            const {name, documents} = item
 
             return new TreeGroup(
                 name,
                 this.groupText(item),
                 documents.map((doc) => {
-                    const path = doc.fsPath;
+                    const path = doc.fsPath
 
                     return new TreeGroupItem(
                         name,
                         path,
                         utils.getFileName(path),
                         {
-                            command   : 'editorLayout.openFile',
-                            title     : 'Execute',
-                            arguments : [doc],
+                            command: 'editorLayout.openFile',
+                            title: 'Execute',
+                            arguments: [doc],
                         },
-                    );
+                    )
                 }),
-            );
-        });
+            )
+        })
     }
 
     groupText(item) {
-        return `${item.name} (${item.documents.length})`;
+        return `${item.name} (${item.documents.length})`
     }
 
     /* -------------------------------------------------------------------------- */
 
     async getChildren(element) {
         if (element === undefined) {
-            return this.data;
+            return this.data
         }
 
-        return element.children;
+        return element.children
     }
 
     getTreeItem(file) {
-        return file;
+        return file
     }
 }
 
 class TreeGroup extends vscode.TreeItem {
-    children;
-    group;
+    children
+    group
 
     constructor(
         group,
@@ -77,16 +77,16 @@ class TreeGroup extends vscode.TreeItem {
             children === undefined
                 ? vscode.TreeItemCollapsibleState.None
                 : vscode.TreeItemCollapsibleState.Expanded,
-        );
+        )
 
-        this.group = group;
-        this.children = children;
+        this.group = group
+        this.children = children
     }
 }
 
 class TreeGroupItem extends vscode.TreeItem {
-    group;
-    path;
+    group
+    path
 
     constructor(
         group,
@@ -94,13 +94,13 @@ class TreeGroupItem extends vscode.TreeItem {
         label,
         command,
     ) {
-        super(label);
+        super(label)
 
-        this.group = group;
-        this.path = path;
-        this.command = command;
-        this.tooltip = `open file "${path}"`;
-        this.iconPath = vscode.ThemeIcon.File;
-        this.contextValue = 'child';
+        this.group = group
+        this.path = path
+        this.command = command
+        this.tooltip = `open file "${path}"`
+        this.iconPath = vscode.ThemeIcon.File
+        this.contextValue = 'child'
     }
 }
