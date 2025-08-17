@@ -61,3 +61,9 @@
 ### 2.0.1
 
 - add new configs `restoreLayoutOnly` [#9](https://github.com/ctf0/vscode-save-editor-layout/issues/9) & `saveToGlobalWhenPossible`
+
+### 3.0.0
+
+- a full snapshot of the layout
+- the extension only have one config now `saveEditorLayout.list` with different format from v2
+- most of the cmnds are removed & we only have 3 now `create, restore, delete`

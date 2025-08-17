@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "2.0.2",
+    "version": "3.0.0",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -16,118 +16,6 @@
     ],
     "main": "./out/main",
     "contributes": {
-        "commands": [
-            {
-                "command": "editorLayout.save",
-                "title": "save group",
-                "category": "Save Editor Layout",
-                "icon": "$(references)"
-            },
-            {
-                "command": "editorLayout.open",
-                "title": "open group",
-                "category": "Save Editor Layout",
-                "icon": "$(symbol-array)"
-            },
-            {
-                "command": "editorLayout.remove",
-                "title": "remove group",
-                "category": "Save Editor Layout"
-            },
-            {
-                "command": "editorLayout.update",
-                "title": "update group",
-                "category": "Save Editor Layout"
-            },
-            {
-                "command": "editorLayout.openFile",
-                "title": "open file",
-                "category": "Save Editor Layout"
-            },
-            {
-                "command": "editorLayout.treeRemove",
-                "title": "remove group/file",
-                "icon": "$(chrome-close)"
-            },
-            {
-                "command": "editorLayout.openGroup",
-                "title": "open group",
-                "icon": "$(folder-opened)"
-            },
-            {
-                "command": "editorLayout.closeAll",
-                "title": "close all opened editors",
-                "icon": "$(close-all)"
-            },
-            {
-                "command": "editorLayout.openSettingsFile",
-                "title": "open settings file",
-                "category": "Save Editor Layout",
-                "icon": "$(settings-gear)"
-            }
-        ],
-        "menus": {
-            "commandPalette": [
-                {
-                    "command": "editorLayout.save",
-                    "when": "editorIsOpen"
-                },
-                {
-                    "command": "editorLayout.update",
-                    "when": "editorIsOpen"
-                },
-                {
-                    "command": "editorLayout.openFile",
-                    "when": "false"
-                },
-                {
-                    "command": "editorLayout.treeRemove",
-                    "when": "false"
-                },
-                {
-                    "command": "editorLayout.openGroup",
-                    "when": "false"
-                },
-                {
-                    "command": "editorLayout.closeAll",
-                    "when": "false"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "editorLayout.open",
-                    "when": "view == layouts_list",
-                    "group": "navigation"
-                },
-                {
-                    "command": "editorLayout.save",
-                    "when": "view == layouts_list && editorIsOpen",
-                    "group": "navigation"
-                },
-                {
-                    "command": "editorLayout.closeAll",
-                    "when": "view == layouts_list && editorIsOpen",
-                    "group": "navigation"
-                },
-                {
-                    "command": "editorLayout.openSettingsFile",
-                    "when": "view == layouts_list",
-                    "group": "navigation"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "editorLayout.treeRemove",
-                    "when": "view == layouts_list",
-                    "group": "inline"
-                },
-                {
-                    "command": "editorLayout.openGroup",
-                    "when": "view == layouts_list && viewItem != child",
-                    "group": "inline"
-                }
-            ]
-        },
         "configuration": {
             "title": "Save Editor Layout",
             "type": "object",
@@ -135,32 +23,18 @@
                 "saveEditorLayout.list": {
                     "type": "array",
                     "default": [],
-                    "description": "groups"
-                },
-                "saveEditorLayout.saveToGlobal": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "save groups globally or per workspace"
-                },
-                "saveEditorLayout.closeEditorsAfterSave": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "close all opened editors after saving a group"
-                },
-                "saveEditorLayout.hideSideBarAfterOpen": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "close sidebar after opening a group"
-                },
-                "saveEditorLayout.saveToGlobalWhenPossible": {
-                    "type": "boolean",
-                    "default": true,
-                    "markdownDescription": "save group globally when no workspace is opened\n\n require `#saveEditorLayout.saveToGlobal#` to be set to false"
-                },
-                "saveEditorLayout.restoreLayoutOnly": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "restore layout only without opening any files"
+                    "description": "Saved layout snapshots",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "file": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -177,14 +51,39 @@
             "editor-layouts": [
                 {
                     "id": "layouts_list",
-                    "name": "List"
+                    "name": "List",
+                    "icon": "img/icon.svg"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "editorLayout.saveSnapshot",
+                "title": "Save Editor Layout: Save Snapshot"
+            },
+            {
+                "command": "editorLayout.restoreSnapshot",
+                "title": "Save Editor Layout: Restore Snapshot"
+            },
+            {
+                "command": "editorLayout.deleteSnapshot",
+                "title": "Save Editor Layout: Delete Snapshot",
+                "icon": "$(trash)"
+            }
+        ],
+        "menus": {
+            "view/item/context": [
+                {
+                    "command": "editorLayout.deleteSnapshot",
+                    "when": "view == layouts_list && viewItem == snapshot",
+                    "group": "inline"
                 }
             ]
         }
     },
     "scripts": {
         "vscode:prepublish": "npm run esbuild-base -- --pure:console.log --minify",
-        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+        "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --external:sqlite3 --format=cjs --platform=node",
         "esbuild": "npm run esbuild-base -- --sourcemap",
         "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
         "watch": "npm run esbuild"
@@ -194,5 +93,8 @@
         "@types/vscode": "^1.100.0",
         "esbuild": "^0.25.9",
         "typescript": "^5.9.2"
+    },
+    "dependencies": {
+        "find-up": "^7.0.0"
     }
 }
