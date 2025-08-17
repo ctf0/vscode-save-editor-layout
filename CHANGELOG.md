@@ -65,3 +65,10 @@
 ### 2.1.0
 
 - add back config `saveEditorLayout.saveAbsolutePath`, thanx to [@FranzKnut](https://github.com/FranzKnut)
+
+### 3.0.0
+
+- a totaly different api
+- a full snapshot of the layout
+- the extension only have one config now `saveEditorLayout.list` with different format from v2
+- new commands
