@@ -157,6 +157,11 @@
                     "default": true,
                     "markdownDescription": "save group globally when no workspace is opened\n\n require `#saveEditorLayout.saveToGlobal#` to be set to false"
                 },
+                "saveEditorLayout.saveAbsolutePath": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "save file path as full absolute path (if false, then save it as relative to the workspace root)"
+                },
                 "saveEditorLayout.restoreLayoutOnly": {
                     "type": "boolean",
                     "default": false,
@@ -192,7 +197,7 @@
     "devDependencies": {
         "@types/node": "^24.2.1",
         "@types/vscode": "^1.100.0",
-        "esbuild": "^0.25.9",
+        "esbuild": "0.25.12",
         "typescript": "^5.9.2"
     }
 }
