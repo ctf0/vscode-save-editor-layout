@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -195,9 +195,9 @@
         "watch": "npm run esbuild"
     },
     "devDependencies": {
-        "@types/node": "^24.2.1",
+        "@types/node": "^25.3.3",
         "@types/vscode": "^1.100.0",
-        "esbuild": "0.25.12",
-        "typescript": "^5.9.2"
+        "esbuild": "0.27.3",
+        "typescript": "^5.9.3"
     }
 }
