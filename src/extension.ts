@@ -1,4 +1,5 @@
 import vscode from 'vscode'
+import path from 'path'
 import TreeProvider from './TreeProvider'
 import * as utils from './util'
 
@@ -97,7 +98,9 @@ async function save() {
 
 function getSortedSaveList(tabs = null) {
     return sortList(tabs || getOpenedTabsWithoutUntitled()).map((tab: vscode.Tab) => ({
-        fsPath: tab.input?.uri?.fsPath,
+        fsPath: utils.config.saveAbsolutePath
+                ? tab.input?.uri?.fsPath
+                : vscode.workspace.asRelativePath(tab.input?.uri?.fsPath),
         column: tab.group.viewColumn,
         pinned: tab.isPinned,
     }))
@@ -280,7 +283,10 @@ function sortList(arr: vscode.Tab[]) {
 
 async function showDocument(doc) {
     try {
-        const document = await vscode.workspace.openTextDocument(doc.fsPath)
+        const resolvedPath = path.isAbsolute(doc.fsPath)
+            ? doc.fsPath
+            : path.join(vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '', doc.fsPath)
+        const document = await vscode.workspace.openTextDocument(resolvedPath)
 
         await vscode.window.showTextDocument(document, {
             viewColumn: doc.column,
