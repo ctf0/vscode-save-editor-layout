@@ -22,7 +22,25 @@ export class WorkspaceStorageReader {
      */
     getWorkspaceStoragePath(): string | undefined {
         if (this.context.storageUri) {
-            return this.context.storageUri.fsPath
+            const vscodeCwd = process.env.VSCODE_CWD
+            const storageUriPath = this.context.storageUri.fsPath
+
+            if (vscodeCwd !== path.sep) {
+                // Extract the workspace hash part
+                // Typical input (portable, remote/wsl2):
+                // '/home/me/.vscode-server/data/User/workspaceStorage/84e1ae2868e1c54873fdf4da87e0efd7/'
+                // Typical output:
+                // 'User/workspaceStorage/84e1ae2868e1c54873fdf4da87e0efd7/'
+                const relativePath = storageUriPath.replace(/^.*(?=User)/, '')
+
+                // Combine the portable root path with the relative path
+                // vscodeCwd = '/mnt/f/vs-code-profiles/'
+                // Typical result:
+                // '/mnt/f/vs-code-profiles/data/user-data/User/workspaceStorage/84e1ae2868e1c54873fdf4da87e0efd7/'
+                return path.posix.join(vscodeCwd, 'data/user-data', relativePath)
+            }
+
+            return storageUriPath
         }
 
         return undefined
@@ -108,11 +126,6 @@ export class WorkspaceStorageReader {
 
     async restoreStateSnapshot(snapshotFileName: string) {
         try {
-            const dbPath = await this.setStateDbPath()
-            const fullPath = util.getNewFileFullPath(dbPath, snapshotFileName)
-
-            await fs.copyFile(fullPath, dbPath)
-
             const confirm = await vscode.window.showWarningMessage(
                 'Layout snapshot restored, VS Code needs to be shutdown then reopened to apply changes. shutdown now?',
                 {modal: true},
@@ -120,7 +133,11 @@ export class WorkspaceStorageReader {
             )
 
             if (confirm === 'Yes') {
-                await vscode.commands.executeCommand('workbench.action.quit')
+                const dbPath = await this.setStateDbPath()
+                const fullPath = util.getNewFileFullPath(dbPath, snapshotFileName)
+                await fs.copyFile(fullPath, dbPath)
+
+                vscode.commands.executeCommand('workbench.action.quit')
             }
         } catch (error) {
             // console.error('Error restoring state snapshot:', error)
