@@ -1,57 +1,10 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import {DatabaseSync} from 'node:sqlite'
 import * as vscode from 'vscode'
 import * as util from './util'
-import {isLayoutKey} from './util'
 import {relaunchApp} from './relaunch'
 
 const dbName = 'state.vscdb'
-
-function openDb(dbPath: string): DatabaseSync {
-    try {
-        const db = new DatabaseSync(dbPath)
-        db.exec('PRAGMA busy_timeout = 5000')
-
-        return db
-    } catch (error) {
-        throw new Error(`cannot open ${dbPath}: ${(error as Error).message}`)
-    }
-}
-
-type DbRow = {key: string, value: Uint8Array}
-
-function readRows(db: DatabaseSync): DbRow[] {
-    return db.prepare('SELECT key, value FROM ItemTable').all() as DbRow[]
-}
-
-function writeRows(db: DatabaseSync, rows: DbRow[]): void {
-    const insert = db.prepare('INSERT OR REPLACE INTO ItemTable(key, value) VALUES (?, ?)')
-
-    for (const row of rows) {
-        insert.run(row.key, row.value)
-    }
-}
-
-function readAllRows(dbPath: string): DbRow[] {
-    const db = openDb(dbPath)
-
-    try {
-        return readRows(db)
-    } finally {
-        db.close()
-    }
-}
-
-function writeAllRows(dbPath: string, rows: DbRow[]): void {
-    const db = openDb(dbPath)
-
-    try {
-        writeRows(db, rows)
-    } finally {
-        db.close()
-    }
-}
 
 async function pathExists(filePath: string): Promise<boolean> {
     return fs.access(filePath).then(() => true).catch(() => false)
@@ -286,17 +239,17 @@ export class WorkspaceStorageReader {
      */
     async saveLayoutTemplate() {
         await util.withError('saving layout template', async() => {
+            if (!await askYesNo('VS Code needs to be restarted to capture the current layout accurately. Restart now?')) {
+                return
+            }
+
             const dbPath = await this.setStateDbPath()
-
-            const layoutRows = readAllRows(dbPath).filter((row) => isLayoutKey(row.key))
-
             const templatePath = util.getTemplatePath(this.context)
-            await fs.mkdir(path.dirname(templatePath), {recursive: true})
 
-            writeAllRows(templatePath, layoutRows)
-
-            await util.updateTemplateContext(this.context)
-            util.showMsg(`Layout template saved (${layoutRows.length} keys)`)
+            await relaunchApp(
+                {type: 'save-template', source: dbPath, dest: templatePath},
+                {type: 'template-saved'},
+            )
         })
     }
 

@@ -71,8 +71,6 @@ async function handlePendingApplyMarker(context: vscode.ExtensionContext) {
     if (marker?.error) {
         utils.showError(`Layout apply failed:\n\n${marker.error}`)
     } else if (marker?.type === 'snapshot' && marker.file) {
-        // accurate save: the helper wrote the snapshot file after shutdown;
-        // register it in the list so it appears in the tree view
         await utils.mutateList((list) => {
             const entry = {file: marker.file!, name: marker.name ?? marker.file!}
 
@@ -82,6 +80,9 @@ async function handlePendingApplyMarker(context: vscode.ExtensionContext) {
         utils.showMsg(`Layout snapshot saved: "${marker.name}"`)
     } else if (marker?.type === 'snapshot') {
         utils.showMsg(`Layout snapshot applied: "${marker.name}"`)
+    } else if (marker?.type === 'template-saved') {
+        await utils.updateTemplateContext(context)
+        utils.showMsg(`Layout template saved (${marker.count} keys)`)
     } else if (marker?.type === 'template') {
         utils.showMsg(`Layout Template applied`)
     }

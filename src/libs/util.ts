@@ -48,7 +48,18 @@ const layoutKeyWhitelist = new Set([
     'workbench.explorer.views.state',
 ])
 
+// Mementos that contain layout preferences (which controls are visible,
+// expanded, etc.), not workspace-specific content like search queries.
+const mementoWhitelist = new Set([
+    'memento/workbench.panel.markers',
+    'memento/workbench.view.search',
+])
+
 export function isLayoutKey(key: string): boolean {
+    if (mementoWhitelist.has(key)) {
+        return true
+    }
+
     // View content (search queries, tree expansion, mementos) is workspace-
     // specific data, not layout; applying it to another workspace would
     // restore stale data in the views.
@@ -80,7 +91,7 @@ export function getSaveMode(): SaveMode {
 }
 
 export type PendingApplyMarker = {
-    type?  : 'snapshot' | 'template'
+    type?  : 'snapshot' | 'template' | 'template-saved'
     name?  : string
     file?  : string
     count? : number

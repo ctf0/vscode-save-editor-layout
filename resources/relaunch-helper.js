@@ -114,7 +114,7 @@ async function waitForExit() {
         // silently producing a wrong layout.
         if (op && typeof op.dest === 'string') {
             try {
-                fs.writeFileSync(path.join(path.dirname(op.dest), PENDING_APPLY_FILE), JSON.stringify({error: 'VS Code did not exit in time; layout was not applied'}))
+                fs.writeFileSync(path.join(markerDir(op), PENDING_APPLY_FILE), JSON.stringify({error: 'VS Code did not exit in time; layout was not applied'}))
             } catch (e) { /* nothing left to report with */ }
         }
 
@@ -122,6 +122,14 @@ async function waitForExit() {
     } else {
         await sleep(3000)
     }
+}
+
+// the workspace storage hash root next to state.vscdb, where the extension
+// reads it; for save-template op.source is the workspace db (same dir)
+function markerDir(op) {
+    return op && op.type === 'save-template' && typeof op.source === 'string'
+        ? path.dirname(op.source)
+        : path.dirname(op.dest)
 }
 
 // merge the template keys into the destination db; returns the number of
@@ -149,6 +157,89 @@ function mergeDb(source, dest) {
     dst.close()
 
     return rows.length
+}
+
+// Keys that define the workspace-scoped layout (must match util.ts)
+const layoutKeyWhitelist = new Set([
+    'workbench.panel.position',
+    'workbench.sideBar.position',
+    'workbench.panel.hidden',
+    'workbench.sideBar.hidden',
+    'workbench.auxiliaryBar.hidden',
+    'workbench.activityBar.hidden',
+    'workbench.statusBar.hidden',
+    'workbench.editor.hidden',
+    'workbench.editor.centered',
+    'workbench.panel.wasLastMaximized',
+    'workbench.auxiliaryBar.wasLastMaximized',
+    'workbench.auxiliaryBar.lastNonMaximizedVisibility',
+    'workbench.panelpart.activepanelid',
+    'workbench.auxiliarybar.activepanelid',
+    'workbench.activity.viewletsWorkspaceState',
+    'workbench.auxiliarybar.viewContainersWorkspaceState',
+    'workbench.panel.viewContainersWorkspaceState',
+    'workbench.explorer.views.state',
+])
+
+const mementoWhitelist = new Set([
+    'memento/workbench.panel.markers',
+    'memento/workbench.view.search',
+])
+
+function isLayoutKey(key) {
+    if (mementoWhitelist.has(key)) {
+        return true
+    }
+
+    if (key.startsWith('memento/') || key.endsWith('.treeViewState')) {
+        return false
+    }
+
+    if (layoutKeyWhitelist.has(key)) {
+        return true
+    }
+
+    if (key.endsWith('.hidden') || key.includes('.state.hidden')) {
+        return false
+    }
+
+    return key.startsWith('workbench.view.')
+      || key.startsWith('workbench.views.service.')
+      || key.startsWith('workbench.panel.')
+}
+
+// Save layout template: read from source db, filter layout keys, write to dest
+function saveTemplate(source, dest) {
+    const sqlite = loadSqlite()
+
+    if (!sqlite) {
+        throw new Error('node:sqlite is unavailable in this VS Code build; please update VS Code to save the template')
+    }
+
+    const src = new sqlite.DatabaseSync(source)
+    const rows = src.prepare('SELECT key, value FROM ItemTable').all()
+    src.close()
+
+    const layoutRows = rows.filter((row) => isLayoutKey(row.key))
+
+    const dir = path.dirname(dest)
+
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, {recursive: true})
+    }
+
+    const dst = new sqlite.DatabaseSync(dest)
+    dst.exec('PRAGMA busy_timeout = 5000')
+    dst.exec('CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB)')
+    const insert = dst.prepare('INSERT OR REPLACE INTO ItemTable(key, value) VALUES (?, ?)')
+
+    for (const row of layoutRows) {
+        insert.run(row.key, row.value)
+    }
+
+    dst.close()
+
+    return layoutRows.length
 }
 
 // Runs after the main process is gone: the workspace db is closed by then, so
@@ -180,7 +271,7 @@ async function applyOp() {
             const message = String((error && error.message) || error)
 
             try {
-                fs.writeFileSync(path.join(destDir, PENDING_APPLY_FILE), JSON.stringify({error: 'failed to back up destination db: ' + message}))
+                fs.writeFileSync(path.join(markerDir(op), PENDING_APPLY_FILE), JSON.stringify({error: 'failed to back up destination db: ' + message}))
             } catch (e) { /* nothing left to report with */ }
 
             return
@@ -197,6 +288,12 @@ async function applyOp() {
                 marker = {...marker, count: mergeDb(op.source, op.dest)}
             } else {
                 mergeDb(op.source, op.dest)
+            }
+        } else if (op.type === 'save-template' && typeof op.source === 'string') {
+            if (marker && typeof marker === 'object') {
+                marker = {...marker, count: saveTemplate(op.source, op.dest)}
+            } else {
+                saveTemplate(op.source, op.dest)
             }
         } else {
             return
@@ -217,14 +314,14 @@ async function applyOp() {
         const message = String((error && error.message) || error)
 
         try {
-            fs.writeFileSync(path.join(destDir, PENDING_APPLY_FILE), JSON.stringify({error: message + ' - ' + rollback()}))
+            fs.writeFileSync(path.join(markerDir(op), PENDING_APPLY_FILE), JSON.stringify({error: message + ' - ' + rollback()}))
         } catch (e) { /* nothing left to report with */ }
 
         return
     }
 
     if (marker && typeof marker === 'object') {
-        fs.writeFileSync(path.join(destDir, PENDING_APPLY_FILE), JSON.stringify(marker))
+        fs.writeFileSync(path.join(markerDir(op), PENDING_APPLY_FILE), JSON.stringify(marker))
     }
 }
 

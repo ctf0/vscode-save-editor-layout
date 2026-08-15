@@ -10,6 +10,7 @@ export type RelaunchOp
     = | {type: 'copy', source: string, dest: string}
       | {type: 'merge', source: string, dest: string}
       | {type: 'snapshot', source: string, dest: string}
+      | {type: 'save-template', source: string, dest: string}
 
 // the helper ships as a plain file next to the bundled out/ dir, and runs as
 // a plain Node process after VS Code exits (see resources/relaunch-helper.js)

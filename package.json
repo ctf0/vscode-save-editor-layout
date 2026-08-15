@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
