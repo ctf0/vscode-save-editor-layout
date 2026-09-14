@@ -31,16 +31,6 @@ now we can save a complete & accurate snapshot of the current editor state witho
 | `Import Layout Template`  | pick a template file (`.vscdb`) and install it as the global template (validated before import; asks for confirmation before overwriting an existing one) |
 | `Refresh`                 | refresh the snapshots view                                                                                                                                |
 
-## SaveMode
-
-Controls how snapshots are saved. Default: `"quick"`.
-
-| Mode       | Behavior                                                                                                                                                         |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quick`    | Copies the workspace database immediately without restarting. Fast, but panel and auxiliary bar positions may not be restored as expected.                       |
-| `accurate` | Quits VS Code, copies the freshly-flushed database after shutdown, then relaunches. Always captures the exact current layout, but requires the editor to reload. |
-| `ask`      | Shows a picker each time you save, letting you choose between quick/accurate modes.                                                                              |
-
 ## Why some operations require a restart
 
 This extension reads and writes VS Code's workspace state database (`state.vscdb`) directly -- there is no API (and probably never will) to control the editor layout programmatically.

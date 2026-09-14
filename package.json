@@ -2,7 +2,7 @@
     "name": "save-editors-layout",
     "displayName": "Save Editors Layout",
     "description": "save opened editors layout",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "publisher": "ctf0",
     "repository": "https://github.com/ctf0/vscode-save-editor-layout",
     "engines": {
@@ -45,22 +45,7 @@
                     "type": "number",
                     "default": 10,
                     "minimum": 7,
-                    "description": "How long to wait after startup before the auto-apply flow checks the workspace state and asks for confirmation."
-                },
-                "saveEditorLayout.saveMode": {
-                    "type": "string",
-                    "default": "quick",
-                    "enum": [
-                        "quick",
-                        "accurate",
-                        "ask"
-                    ],
-                    "enumDescriptions": [
-                        "Save immediately without restarting. Panels and auxiliary bar positions wont be captured, but fast and non-intrusive.",
-                        "Restart VS Code to capture the exact current layout, then save. Always accurate but interrupts your workflow.",
-                        "Ask which mode to use each time you save a snapshot."
-                    ],
-                    "description": "How to save layout snapshots."
+                    "description": "How long in seconds to wait after startup before the auto-apply flow checks the workspace state and asks for confirmation."
                 }
             }
         },
@@ -187,6 +172,28 @@
                     "command": "editorLayout.deleteSnapshot",
                     "when": "view == layouts_list && viewItem == snapshot",
                     "group": "inline"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "editorLayout.restoreSnapshot",
+                    "when": "never"
+                },
+                {
+                    "command": "editorLayout.deleteSnapshot",
+                    "when": "never"
+                },
+                {
+                    "command": "editorLayout.refresh",
+                    "when": "never"
+                },
+                {
+                    "command": "editorLayout.saveTemplate",
+                    "when": "!editorLayout.hasTemplate"
+                },
+                {
+                    "command": "editorLayout.updateTemplate",
+                    "when": "editorLayout.hasTemplate"
                 }
             ]
         }

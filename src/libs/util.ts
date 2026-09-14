@@ -84,12 +84,6 @@ export function isLayoutKey(key: string): boolean {
       || key.startsWith('workbench.panel.')
 }
 
-export type SaveMode = 'quick' | 'accurate' | 'ask'
-
-export function getSaveMode(): SaveMode {
-    return config.get<SaveMode>('saveMode', 'quick')
-}
-
 export type PendingApplyMarker = {
     type?  : 'snapshot' | 'template' | 'template-saved'
     name?  : string

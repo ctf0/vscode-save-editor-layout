@@ -117,60 +117,14 @@ export class WorkspaceStorageReader {
                 return
             }
 
-            const saveMode = await this.resolveSaveMode()
+            const fileName = await uniqueSnapshotFileName(dbPath, 'state_snapshot', Date.now())
+            const fullPath = util.getNewFileFullPath(dbPath, fileName)
 
-            if (!saveMode) {
-                return
-            }
-
-            if (saveMode === 'quick') {
-                util.showMsg(`Creating snapshot at: ${path.dirname(dbPath)}`)
-
-                await backupStateDb(dbPath, 'state_snapshot', () => name)
-
-                util.showMsg(`Layout snapshot saved: ${name}`)
-            } else {
-                // accurate: quit → helper copies the freshly-flushed db →
-                // relaunch. The snapshot file name is computed now so the
-                // helper knows where to write, and the marker carries the
-                // name so the next activation can register it in the list.
-                const fileName = await uniqueSnapshotFileName(dbPath, 'state_snapshot', Date.now())
-                const fullPath = util.getNewFileFullPath(dbPath, fileName)
-
-                await relaunchApp(
-                    {type: 'snapshot', source: dbPath, dest: fullPath},
-                    {type: 'snapshot', name, file: fileName},
-                )
-            }
+            await relaunchApp(
+                {type: 'snapshot', source: dbPath, dest: fullPath},
+                {type: 'snapshot', name, file: fileName},
+            )
         })
-    }
-
-    private async resolveSaveMode(): Promise<'quick' | 'accurate' | undefined> {
-        const mode = util.getSaveMode()
-
-        if (mode !== 'ask') {
-            return mode
-        }
-
-        // ask: show a quick pick so the user decides each time
-        const choice = await vscode.window.showQuickPick(
-            [
-                {
-                    label       : '$(zap) Quick Save',
-                    description : 'Save immediately without restarting',
-                    mode        : 'quick' as const,
-                },
-                {
-                    label       : '$(sync) Accurate Save',
-                    description : 'Restart VS Code to capture the exact layout',
-                    mode        : 'accurate' as const,
-                },
-            ],
-            {placeHolder: 'Choose how to save this snapshot'},
-        )
-
-        // cancelled: skip the save instead of surfacing an error
-        return choice?.mode
     }
 
     private validateSnapshotName(value: string): string | null {
