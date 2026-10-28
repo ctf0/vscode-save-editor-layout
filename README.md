@@ -14,7 +14,7 @@ now we can save a complete & accurate snapshot of the current editor state witho
 - **Layout templates** (global & portable) -- save the current layout as a template so you can apply it to every/any workspace, you can also export/import it so you use it on different machines.
 - **Snapshots view** -- a tree view listing all snapshots of the current workspace, with orphaned entries pruned automatically.
 - **Auto apply** -- optionally apply the layout template automatically to new workspaces.
-- **Accurate save** -- optionally restart VS Code when saving a snapshot so the database captures the exact current layout, including panels and auxiliary bar state.
+- **Accurate save** -- restart VS Code when saving a snapshot so the database captures the exact current layout, including panels and auxiliary bar state.
 - Access all the extension features through the view title bar or the command palette.
 
 ## Commands
